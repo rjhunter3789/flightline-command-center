@@ -1,0 +1,230 @@
+/* DealFlow.css - Deal flow pipeline visualization styles */
+
+.deal-flow {
+  background: #1E293B;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.pipeline-visualization {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.pipeline-stage {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stage-card {
+  background: #0F172A;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stage-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stage-card.selected {
+  border-color: #3B82F6;
+  background: #1E293B;
+}
+
+.stage-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stage-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stage-info h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: #F1F5F9;
+}
+
+.stage-info p {
+  font-size: 0.875rem;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.stage-metrics {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.deal-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.count-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F1F5F9;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.875rem;
+  color: #94A3B8;
+}
+
+.stage-percentage {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #94A3B8;
+}
+
+.stage-preview {
+  border-top: 1px solid #334155;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.preview-deal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.customer-name {
+  color: #E2E8F0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.deal-time {
+  color: #94A3B8;
+  font-size: 0.75rem;
+}
+
+.more-deals {
+  text-align: center;
+  color: #64748B;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.pipeline-arrow {
+  font-size: 2rem;
+  color: #475569;
+  line-height: 1;
+  margin-top: 3rem;
+}
+
+/* Flow Controls */
+.flow-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.flow-filter {
+  background: #0F172A;
+  border: 1px solid #334155;
+  color: #94A3B8;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flow-filter:hover {
+  background: #1E293B;
+  border-color: #475569;
+  color: #E2E8F0;
+}
+
+.flow-filter.active {
+  background: #3B82F6;
+  border-color: #3B82F6;
+  color: white;
+}
+
+/* Flow Insights */
+.flow-insights {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.insight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.insight-icon {
+  font-size: 1rem;
+}
+
+.insight-text {
+  color: #94A3B8;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .pipeline-visualization {
+    flex-wrap: wrap;
+  }
+  
+  .pipeline-arrow {
+    display: none;
+  }
+  
+  .stage-card {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .deal-flow {
+    padding: 1rem;
+  }
+  
+  .stage-card {
+    flex: 1 1 100%;
+    min-width: unset;
+  }
+  
+  .flow-insights {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Builds
+frontend/build/
+dist/
+build/
+
+# Logs
+logs/
+backend/logs/
+*.log
+pm2-*.log
+
+# Environment / secrets
+.env
+.env.*
+backend/.env
+frontend/.env
+frontend/.env.*
+.env.production
+
+# Archives / backups
+*.tar.gz
+*.zip
+*.bak
+*.backup
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Runtime
+*.pid

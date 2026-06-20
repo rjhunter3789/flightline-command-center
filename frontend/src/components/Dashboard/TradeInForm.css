@@ -1,0 +1,325 @@
+.trade-in-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+  }
+
+  .trade-in-form {
+    background: #1a1f2e;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .trade-in-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .trade-in-form-header h2 {
+    color: #fff;
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s;
+  }
+
+  .close-btn:hover {
+    color: #fff;
+  }
+
+  .trade-in-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .tab.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #4a9eff;
+  }
+
+  .tab-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #4a9eff;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .value-calculations {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .calculation-results {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .calc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+
+  .calc-item span {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .calc-item strong {
+    font-size: 1.1rem;
+    color: #fff;
+  }
+
+  .calc-item.alert {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+  }
+
+  .calc-item.alert strong {
+    color: #ff6b6b;
+  }
+
+  .calc-item strong.negative {
+    color: #ff6b6b;
+  }
+
+  .calc-item strong.positive {
+    color: #51cf66;
+  }
+
+  .approval-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 4px;
+    color: #ffc107;
+  }
+
+  .book-values {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .book-section {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .book-section h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+  }
+
+  .book-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .book-inputs input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  .book-inputs input:focus {
+    outline: none;
+    border-color: #4a9eff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .inspection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .inspection-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .inspection-item label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .inspection-item select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .cancel-btn,
+  .save-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+
+  .save-btn {
+    background: #4a9eff;
+    color: #fff;
+  }
+
+  .save-btn:hover {
+    background: #3a8eef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
+  }
+
+/* Disable all transforms when trade-in overlay is visible */
+  body:has(.trade-in-form-overlay) .deal-card {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  body:has(.trade-in-form-overlay) .floating-dashboard * {
+    pointer-events: none !important;
+  }
+
+  body:has(.trade-in-form-overlay) .trade-in-form-overlay,
+  body:has(.trade-in-form-overlay) .trade-in-form-overlay * {
+    pointer-events: auto !important;
+  }

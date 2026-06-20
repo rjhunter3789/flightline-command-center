@@ -1,0 +1,51 @@
+.incentive-display {
+    margin-top: 0.5rem;
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 6px;
+  }
+
+  .incentive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+
+  .incentive-header:hover {
+    background: #334155;
+  }
+
+  .incentive-tag {
+    color: #10B981;
+    font-weight: 500;
+  }
+
+  .incentive-savings {
+    color: #10B981;
+    font-weight: 600;
+  }
+
+  .incentive-list {
+    padding: 0.5rem;
+    border-top: 1px solid #334155;
+  }
+
+  .incentive-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.75rem;
+    color: #CBD5E1;
+  }
+
+  .incentive-name {
+    flex: 1;
+  }
+
+  .incentive-amount {
+    color: #10B981;
+    font-weight: 500;
+  }

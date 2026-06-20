@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flightline - Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419, #1a1f2e);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #00d4ff;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-status {
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            color: #a0a9b8;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .main-dashboard {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .mission-status {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .mission-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+        }
+
+        .mission-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a0a9b8;
+            margin-top: 0.25rem;
+        }
+
+        .alerts {
+            background: rgba(255, 69, 0, 0.1);
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-icon {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        .deal-flow {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .flow-stages {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stage {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 200px;
+        }
+
+        .stage-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .showroom { border-top: 3px solid #00d4ff; }
+        .test-drives { border-top: 3px solid #ffa500; }
+        .finance { border-top: 3px solid #00ff88; }
+
+        .deal-cards {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .deal-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .deal-card:hover {
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+        }
+
+        .deal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .deal-id {
+            font-size: 0.9rem;
+            color: #a0a9b8;
+        }
+
+        .deal-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .status-pending { background: rgba(255, 165, 0, 0.2); color: #ffa500; }
+        .status-urgent { background: rgba(255, 69, 0, 0.2); color: #ff4500; }
+
+        .customer-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .vehicle-info {
+            color: #a0a9b8;
+            margin-bottom: 1rem;
+        }
+
+        .deal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #a0a9b8;
+            font-size: 0.8rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .next-action {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .action-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            color: #00d4ff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .stage-deal {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .stage-deal-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stage-deal-info {
+            color: #a0a9b8;
+            font-size: 0.75rem;
+        }
+
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 69, 0, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .main-dashboard {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .flow-stages {
+                grid-template-columns: 1fr;
+            }
+            
+            .deal-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✈️ Flightline</h1>
+        <div class="time-status">
+            <span class="live-indicator"></span>
+            <span id="current-time">SATURDAY 2:47 PM - LIVE BATTLEFIELD</span>
+        </div>
+    </div>
+
+    <div class="main-dashboard">
+        <!-- Mission Status -->
+        <div class="mission-status">
+            <div class="mission-title">🚀 TODAY'S MISSION</div>
+            <div class="mission-stats">
+                <div class="stat-card">
+                    <div class="stat-number">19</div>
+                    <div class="stat-label">Active Deals</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$127K</div>
+                    <div class="stat-label">Gross Potential</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Ready to Close</div>
+                </div>
+            </div>
+            
+            <div class="alerts">
+                <div class="alert-item">
+                    <span class="alert-icon">⚠️</span>
+                    <span>3 CRITICAL: Finance approval needed</span>
+                </div>
+                <div class="alert-item">
+                    <span class="alert-icon">🔥</span>
+                    <span>2 HOT: Test drives returning in <30min</span>
+                </div>
+                <div class="alert-item">
+                    <span class="alert-icon">📞</span>
+                    <span>4 overdue follow-ups (>48 hours)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deal Flow -->
+        <div class="deal-flow">
+            <div class="mission-title">📊 DEAL FLOW - REAL TIME</div>
+            <div class="flow-stages">
+                <div class="stage showroom">
+                    <div class="stage-title">🏬 SHOWROOM (6)</div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Williams</div>
+                        <div class="stage-deal-info">$35K SUV • Tier 2 • 15min</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Chen</div>
+                        <div class="stage-deal-info">Camry Hybrid • Cash • 32min</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Rodriguez</div>
+                        <div class="stage-deal-info">F-150 • Tier 1 • 8min</div>
+                    </div>
+                </div>
+
+                <div class="stage test-drives">
+                    <div class="stage-title">🚗 TEST DRIVES (4)</div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Johnson</div>
+                        <div class="stage-deal-info">Silverado • 47min • OVERDUE</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Kim</div>
+                        <div class="stage-deal-info">Accord • 23min</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Davis</div>
+                        <div class="stage-deal-info">Explorer • 12min</div>
+                    </div>
+                </div>
+
+                <div class="stage finance">
+                    <div class="stage-title">💰 F&I (5)</div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Martinez</div>
+                        <div class="stage-deal-info">Tier 1 • $2.1K gross • 15min</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Thompson</div>
+                        <div class="stage-deal-info">Tier 2 • $1.8K gross • 45min</div>
+                    </div>
+                    <div class="stage-deal">
+                        <div class="stage-deal-name">Wilson</div>
+                        <div class="stage-deal-info">Cash • $3.2K gross • 8min</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deal Cards -->
+        <div class="deal-cards">
+            <div class="deal-card">
+                <div class="deal-header">
+                    <div class="deal-id">DEAL #47291</div>
+                    <div class="deal-status status-urgent">URGENT</div>
+                </div>
+                <div class="customer-name">Mike Johnson</div>
+                <div class="vehicle-info">2019 Chevrolet Silverado 1500 LT</div>
+                
+                <div class="deal-details">
+                    <div class="detail-item">
+                        <div class="detail-label">STATUS</div>
+                        <div class="detail-value">Test Drive (47min)</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">GROSS</div>
+                        <div class="detail-value">$3,200</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">PAYMENT</div>
+                        <div class="detail-value">$421/mo</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">CREDIT</div>
+                        <div class="detail-value">Tier 2 (680)</div>
+                    </div>
+                </div>
+
+                <div class="next-action">
+                    <div class="action-text">🔔 Call now - test drive overdue</div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">Auto-Dial</button>
+                        <button class="btn btn-secondary">Send Text</button>
+                        <button class="btn btn-secondary">Mark Returned</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="deal-card">
+                <div class="deal-header">
+                    <div class="deal-id">DEAL #47288</div>
+                    <div class="deal-status status-pending">PENDING</div>
+                </div>
+                <div class="customer-name">Sarah Rodriguez</div>
+                <div class="vehicle-info">2024 Ford Explorer ST</div>
+                
+                <div class="deal-details">
+                    <div class="detail-item">
+                        <div class="detail-label">STATUS</div>
+                        <div class="detail-value">Finance Hold</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">GROSS</div>
+                        <div class="detail-value">$4,100</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">PAYMENT</div>
+                        <div class="detail-value">$527/mo</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">BANK</div>
+                        <div class="detail-value">Chase (2.5hrs)</div>
+                    </div>
+                </div>
+
+                <div class="next-action">
+                    <div class="action-text">📞 Call Chase Bank - approval pending</div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">Call Bank</button>
+                        <button class="btn btn-secondary">Try Alt Lender</button>
+                        <button class="btn btn-secondary">Manager Override</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="deal-card">
+                <div class="deal-header">
+                    <div class="deal-id">DEAL #47285</div>
+                    <div class="deal-status status-active">ACTIVE</div>
+                </div>
+                <div class="customer-name">James Martinez</div>
+                <div class="vehicle-info">2023 Honda Accord EX-L</div>
+                
+                <div class="deal-details">
+                    <div class="detail-item">
+                        <div class="detail-label">STATUS</div>
+                        <div class="detail-value">F&I Office</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">GROSS</div>
+                        <div class="detail-value">$2,100</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">PAYMENT</div>
+                        <div class="detail-value">$389/mo</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">CREDIT</div>
+                        <div class="detail-value">Tier 1 (750)</div>
+                    </div>
+                </div>
+
+                <div class="next-action">
+                    <div class="action-text">✅ Closing in progress - 73% likely</div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">View Contract</button>
+                        <button class="btn btn-secondary">Add Products</button>
+                        <button class="btn btn-secondary">Check Status</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time updates
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            }).toUpperCase();
+            document.getElementById('current-time').innerHTML = 
+                '<span class="live-indicator"></span>' + timeString + ' - LIVE BATTLEFIELD';
+        }
+
+        // Simulate incoming alerts
+        function showAlert(message) {
+            const alert = document.createElement('div');
+            alert.className = 'floating-alert';
+            alert.innerHTML = '🚨 ' + message;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Add click handlers for deal cards
+        document.querySelectorAll('.deal-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const dealId = this.querySelector('.deal-id').textContent;
+                console.log('Clicked deal:', dealId);
+                // In real app, this would open deal details
+            });
+        });
+
+        // Add click handlers for action buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const action = this.textContent;
+                console.log('Action clicked:', action);
+                
+                // Simulate actions
+                if (action === 'Auto-Dial') {
+                    showAlert('Dialing Mike Johnson... (555) 123-4567');
+                } else if (action === 'Call Bank') {
+                    showAlert('Calling Chase Bank automated line...');
+                } else if (action === 'Send Text') {
+                    showAlert('Text sent: "Hi Mike, checking in on your test drive!"');
+                }
+            });
+        });
+
+        // Simulate random updates
+        setInterval(() => {
+            const alerts = [
+                'New lead assigned: Toyota Camry inquiry',
+                'Test drive returned: Johnson - Silverado',
+                'Finance approved: Rodriguez - Explorer',
+                'Hot lead: Kim browsing F-150s for 15min'
+            ];
+            
+            if (Math.random() < 0.3) { // 30% chance every 10 seconds
+                const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+                showAlert(randomAlert);
+            }
+        }, 10000);
+
+        // Update time every minute
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Add some dynamic behavior to simulate real-time updates
+        setInterval(() => {
+            // Randomly update deal times
+            const dealCards = document.querySelectorAll('.stage-deal-info');
+            dealCards.forEach(info => {
+                if (info.textContent.includes('min')) {
+                    const currentText = info.textContent;
+                    const timeMatch = currentText.match(/(\d+)min/);
+                    if (timeMatch) {
+                        const currentTime = parseInt(timeMatch[1]);
+                        const newTime = currentTime + 1;
+                        info.textContent = currentText.replace(/\d+min/, newTime + 'min');
+                        
+                        // Add overdue warning if over 45 minutes
+                        if (newTime > 45 && !currentText.includes('OVERDUE')) {
+                            info.textContent += ' • OVERDUE';
+                            info.style.color = '#ff4500';
+                        }
+                    }
+                }
+            });
+        }, 30000); // Update every 30 seconds for demo
+    </script>
+</body>
+</html>

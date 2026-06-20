@@ -1,0 +1,272 @@
+ /* Floating Dashboard Styles */
+  .floating-dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #0F172A;
+    color: #E2E8F0;
+    overflow: hidden;
+  }
+
+  .dashboard-workspace {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-image:
+      radial-gradient(circle at 20% 50%, #1E293B 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, #1E293B 0%, transparent 50%);
+  }
+
+  /* Floating Windows */
+  .floating-window {
+    position: absolute !important;
+  }
+
+  .window-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+  }
+
+  .floating-window.active .window-container {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 1px #3B82F6, 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Window Header */
+  .window-header {
+    background: #0F172A;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    user-select: none;
+    border-bottom: 1px solid #334155;
+  }
+
+  .window-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #E2E8F0;
+  }
+
+  .window-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .window-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: #334155;
+    border: none;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .window-btn:hover {
+    background: #475569;
+    color: #E2E8F0;
+  }
+
+  .window-btn.close:hover {
+    background: #EF4444;
+    color: white;
+  }
+
+  /* Window Content */
+  .window-content {
+    flex: 1;
+    padding: 1rem;
+    overflow: auto;
+  }
+
+  /* Deal Cards Container */
+  .deal-cards-container {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .deal-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  /* React-rnd Resize Handles */
+  .floating-window .react-resizable-handle {
+    position: absolute;
+    user-select: none;
+  }
+
+  .floating-window .react-resizable-handle-se {
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+    width: 20px;
+    height: 20px;
+  }
+
+  .floating-window .react-resizable-handle-se::after {
+    content: '';
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 5px;
+    height: 5px;
+    border-right: 2px solid #64748B;
+    border-bottom: 2px solid #64748B;
+  }
+
+  /* Dashboard Header (reuse existing styles) */
+  .dashboard-header {
+    background: #1E293B;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .dashboard-controls {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .dashboard-time {
+    font-size: 1.125rem;
+    color: #64748B;
+  }
+
+  .layout-controls {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .control-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #334155;
+    color: #E2E8F0;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .control-btn:hover {
+    background: #475569;
+  }
+
+  .control-btn.active {
+    background: #3B82F6;
+    border-color: #60A5FA;
+  }
+
+  .save-btn {
+    background: #10B981;
+    border-color: #34D399;
+  }
+
+  .save-btn:hover {
+    background: #059669;
+  }
+
+  .reset-btn {
+    background: #EF4444;
+    border-color: #F87171;
+  }
+
+  .reset-btn:hover {
+    background: #DC2626;
+  }
+
+  /* Dashboard Footer */
+  .dashboard-footer {
+    background: #1E293B;
+    padding: 1rem;
+    text-align: center;
+    border-top: 2px solid #334155;
+  }
+
+  .dashboard-footer p {
+    margin: 0;
+    color: #64748B;
+    font-size: 0.875rem;
+  }
+
+  /* Loading State */
+  .dashboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #0F172A;
+    color: #E2E8F0;
+  }
+
+  /* Scrollbars */
+  .window-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .window-content::-webkit-scrollbar-track {
+    background: #0F172A;
+  }
+
+  .window-content::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+  }
+
+  .window-content::-webkit-scrollbar-thumb:hover {
+    background: #64748B;
+  }
+
+  /* Fix AlertSystem inside floating window */
+  .window-content .alert-system {
+    position: relative !important;
+    bottom: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .window-content .alert-system .alert-header {
+    background: #0F172A;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .window-content .alert-system .alert-list {
+    background: #0F172A;
+    border-radius: 0 0 8px 8px;
+  }

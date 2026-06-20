@@ -1,0 +1,385 @@
+  /**
+   * Flightline™ - Mobile Styles
+   * Copyright (c) 2025 JL Robinson. All Rights Reserved.
+   */
+
+  .flightline-mobile {
+    min-height: 100vh;
+    background-color: #020617; /* slate-950 */
+    color: #f8fafc; /* slate-50 */
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Header Styles */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-content {
+    flex: 1;
+  }
+
+  .mobile-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+
+  .mobile-subtitle {
+    font-size: 12px;
+    color: #94a3b8; /* slate-400 */
+    margin: 0;
+  }
+
+  .dealer-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    background-color: #1e293b; /* slate-800 */
+  }
+
+  /* CTA Section Styles */
+  .cta-section {
+    margin-top: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8; /* slate-400 */
+    margin: 0 0 8px 0;
+  }
+
+  .cta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .cta-button {
+    border-radius: 16px;
+    border: 1px solid #1e293b; /* slate-800 */
+    background-color: rgba(2, 6, 23, 0.6); /* slate-950/60 */
+    padding: 12px 12px;
+    text-align: left;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 150ms;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .cta-button.active {
+    border-color: #22d3ee; /* cyan-400 */
+    background-color: #0f172a; /* slate-900 */
+  }
+
+  .cta-button:active {
+    transform: scale(0.98);
+  }
+
+  .cta-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f8fafc;
+  }
+
+  .cta-description {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #94a3b8; /* slate-400 */
+  }
+  /* Deals Section Styles */
+  .deals-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-hint {
+    font-size: 11px;
+    color: #94a3b8; /* slate-400 */
+    margin: 0;
+  }
+
+  /* Stage Pills */
+  .stage-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stage-pills::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .stage-pills::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 2px;
+  }
+
+  .stage-pills::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 2px;
+  }
+
+  .stage-pill {
+    white-space: nowrap;
+    border-radius: 9999px;
+    border: 1px solid #334155; /* slate-700 */
+    background-color: #0f172a; /* slate-900 */
+    color: #cbd5e1; /* slate-300 */
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 150ms;
+    cursor: pointer;
+  }
+
+  .stage-pill.active {
+    border-color: #22d3ee; /* cyan-400 */
+    background-color: rgba(34, 211, 238, 0.1); /* cyan-500/10 */
+    color: #67e8f9; /* cyan-200 */
+  }
+
+  /* Deals List */
+  .deals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .no-deals {
+    font-size: 12px;
+    color: #64748b; /* slate-500 */
+    padding: 16px;
+    text-align: center;
+    border: 1px dashed #334155; /* slate-700 */
+    border-radius: 12px;
+  }
+
+  .deal-card {
+    width: 100%;
+    text-align: left;
+    border-radius: 16px;
+    border: 1px solid #1e293b; /* slate-800 */
+    background-color: #0f172a; /* slate-900 */
+    padding: 12px 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 150ms;
+  }
+
+  .deal-card:active {
+    transform: scale(0.99);
+  }
+
+  .deal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .deal-id {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .deal-stage {
+    font-size: 10px;
+    color: #94a3b8; /* slate-400 */
+  }
+
+  .deal-vehicle {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #cbd5e1; /* slate-300 */
+  }
+
+  .deal-footer {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #94a3b8; /* slate-400 */
+  }
+
+  /* Totals Section */
+  .totals-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .totals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .total-card {
+    border-radius: 16px;
+    border: 1px solid #1e293b; /* slate-800 */
+    background-color: #0f172a; /* slate-900 */
+    padding: 12px 12px;
+  }
+
+  .total-label {
+    font-size: 11px;
+    color: #94a3b8; /* slate-400 */
+  }
+
+  .total-count {
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  /* Snapshot Section */
+  .snapshot-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metric-card {
+    border-radius: 16px;
+    border: 1px solid #1e293b;
+    background-color: #0f172a;
+    padding: 12px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  .metric-value {
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Staff Section */
+  .staff-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .staff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .staff-card {
+    border-radius: 16px;
+    border: 1px solid #1e293b;
+    background-color: #0f172a;
+    padding: 12px;
+  }
+
+  .staff-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .staff-metrics {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  /* Chat Section */
+  .chat-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .sentiment-positive {
+    color: #4ade80; /* green-400 */
+  }
+
+  .sentiment-neutral {
+    color: #fbbf24; /* amber-400 */
+  }
+
+  .sentiment-negative {
+    color: #f87171; /* red-400 */
+  }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 375px) {
+    .flightline-mobile {
+      padding: 8px 12px;
+    }
+
+    .cta-grid {
+      gap: 8px;
+    }
+
+    .cta-button {
+      padding: 10px 10px;
+    }
+
+    .cta-label {
+      font-size: 13px;
+    }
+
+    .cta-description {
+      font-size: 10px;
+    }
+  }
+
+  /* Dark mode scrollbar */
+  .flightline-mobile ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .flightline-mobile ::-webkit-scrollbar-track {
+    background: #1e293b;
+  }
+
+  .flightline-mobile ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+  }
+
+  .flightline-mobile ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
