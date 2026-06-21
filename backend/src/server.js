@@ -117,11 +117,16 @@ const startServer = async () => {
 // Handle graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
+
+  server.close(async () => {
+    try {
+      await mongoose.connection.close(false);
       logger.info('MongoDB connection closed');
       process.exit(0);
-    });
+    } catch (error) {
+      logger.error('Error closing MongoDB connection:', error);
+      process.exit(1);
+    }
   });
 });
 
