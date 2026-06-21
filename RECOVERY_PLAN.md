@@ -1,109 +1,135 @@
-. Here's a simplified version focusing on your current setup:
+# Flightline Recovery Plan
 
-  # Flightline Recovery Plan
+Last Updated: June 21, 2026
 
-  ## Current Server Information
-  - Server: DigitalOcean Droplet
-  - IP: 146.190.39.214
-  - OS: Ubuntu 24.04 LTS
-  - Location: /var/www/flightline
+## Current Server Information
 
-  ## Running Services
-  1. flightline-backend (PM2 id: 2)
-  2. auto-audit (PM2 id: 0)
-  3. smart-doc (PM2 id: 1)
-  4. MongoDB 6.0.25
+| Item | Value |
+|---|---|
+| Server | DigitalOcean server shown as `autoauditpro` |
+| Flightline location | `/var/www/flightline` |
+| Backend location | `/var/www/flightline/backend` |
+| Frontend location | `/var/www/flightline/frontend` |
+| Backend entry point | `/var/www/flightline/backend/src/server.js` |
+| PM2 process | `flightline-backend` |
+| Backend port | `3001` |
+| Database | Local MongoDB on `127.0.0.1:27017` |
+| GitHub repo | `rjhunter3789/flightline-command-center` |
 
-  ## Quick Recovery Commands
+## Desired PM2 State
 
-  ### If Flightline Crashes:
-  ```bash
-  pm2 restart flightline-backend
-  pm2 logs flightline-backend --lines 50
+| Process | Desired State | Notes |
+|---|---|---|
+| `auto-audit` | Online | Auto Audit Pro production app |
+| `flightline-backend` | Online | Flightline backend |
+| `smart-doc-v2` | Stopped | Retired/shelved prototype |
 
-  If MongoDB Issues:
+## Quick Health Check
 
-  sudo systemctl status mongod
-  sudo systemctl restart mongod
+```bash
+pm2 status
+systemctl status mongod --no-pager
+df -h
+free -h
+```
 
-  Check All Services:
+Expected:
 
-  pm2 status
-  pm2 logs --lines 20
+- `auto-audit` online
+- `flightline-backend` online
+- `smart-doc-v2` stopped
+- MongoDB active running
+- Disk below warning level
+- Swap active
 
-  Backup Commands
+## If Flightline Crashes
 
-  Manual Backup:
+Check PM2 and logs:
 
-  # Backup code (excluding node_modules)
-  tar -czf flightline-backup-$(date +%Y%m%d).tar.gz --exclude='node_modules' /var/www/flightline
+```bash
+pm2 status
+pm2 logs flightline-backend --lines 80 --nostream
+```
 
-  # Backup MongoDB
-  mongodump --db flightline --out /tmp/mongo-backup-$(date +%Y%m%d)
+Check MongoDB:
 
-  Environment Files
+```bash
+systemctl status mongod --no-pager
+ss -ltnp | grep 27017
+```
 
-  - Backend: /var/www/flightline/backend/.env
-  - MongoDB: 127.0.0.1:27017
-  - JWT secrets need to be changed from defaults
+If MongoDB is down:
 
-  Common Fixes
+```bash
+systemctl restart mongod
+systemctl status mongod --no-pager
+pm2 restart flightline-backend
+pm2 status
+```
 
-  Rate Limit Error:
+## Known June 2026 Failure Pattern
 
-  - Already fixed: app.set('trust proxy', true); in server.js
+Flightline was crash-looping because MongoDB was down after an OOM kill. The server had no swap at the time.
 
-  MongoDB Connection:
+Corrective actions completed:
 
-  - Already fixed: Use 127.0.0.1 instead of localhost
+- Added persistent 2GB swap at `/swapfile`.
+- Restarted MongoDB.
+- Restarted Flightline.
+- Left Smart Doc stopped.
+- Fixed Mongoose shutdown handler.
 
-  Frontend Changes:
+## Mongoose Shutdown Handler
 
-  cd /var/www/flightline/frontend
-  npm run build
+The old Mongoose callback shutdown pattern is no longer valid. The handler in `backend/src/server.js` was updated to use async/await.
 
-  Access Recovery
+If the following appears in logs, verify the current server file has the async/await shutdown handler:
 
-  If locked out:
-  1. DigitalOcean Dashboard → Access → Reset Root Password
-  2. Use web console if SSH fails
+```text
+MongooseError: Connection.prototype.close() no longer accepts a callback
+```
 
-  Local Backup Location
+## Backup Guidance
 
-  Windows: C:\Users\nakap\Desktop\Flightline\
- ## Version 2.0.0 Implementation Notes
+Code is now backed up through GitHub.
 
-  ### Successful Architecture
-  - **FloatingDashboard.jsx**: Main container with 5 windows
-  - **Chat.jsx & Chat.css**: Slack-like team communication
-  - **react-rnd**: Provides drag and resize functionality
+Before any major change:
 
-  ### Window Default Positions
-  ```javascript
-  missionStatus: { x: 20, y: 80, width: 350, height: 400 }
-  dealFlow: { x: 390, y: 80, width: 800, height: 200 }
-  dealCards: { x: 390, y: 300, width: 800, height: 400 }
-  alerts: { x: 20, y: 500, width: 350, height: 200 }
-  chat: { x: 1210, y: 80, width: 500, height: 600 }
+```bash
+cd /var/www/flightline
+git status
+```
 
-  Production Access URLs
+After verified changes:
 
-  - Auto Audit Pro: http://146.190.39.214 (port 80)
-  - Flightline: http://146.190.39.214:8080 (port 8080)
+```bash
+git add <files>
+git commit -m "<message>"
+git push
+```
 
-  Next Development Tasks
+## Environment Files
 
-  1. Connect chat to real backend (WebSocket)
-  2. Fix WebSocket connection URL
-  3. Add user authentication
-  4. Persist messages to database
-  5. Real-time sync across users
+Environment files should remain on the server and should not be committed.
 
-  Deployment Verified
+Important:
 
-  - Date: 2025-08-25
-  - Version: 2.0.0
-  - Status: Fully operational
-  - Features: All working as designed
+- Do not commit `.env` files.
+- Do not commit credentials.
+- Do not commit token files.
+- Verify `git status` before every commit.
 
-  Your Flightline v2.0.0 is now fully documented and operational! 🚀
+## Access Recovery
+
+If SSH access is lost, use the DigitalOcean dashboard console or reset root password from the DigitalOcean dashboard.
+
+## Documentation
+
+Current detailed documentation is in the `docs/` folder.
+
+Start with:
+
+- `docs/FLIGHTLINE-DOCUMENTATION-INDEX.md`
+- `docs/FLIGHTLINE-OPERATIONS-RUNBOOK.md`
+- `docs/FLIGHTLINE-TROUBLESHOOTING.md`
+- `docs/FLIGHTLINE-RECOVERY-2026-06-21.md`
