@@ -232,7 +232,13 @@
         )}
 
         {selectedCta === "dealFlow" && (
-          <DealFlowTotalsSection countsByStage={countsByStage} />
+          <DealFlowTotalsSection
+            countsByStage={countsByStage}
+            onStageSelect={(stage) => {
+              setSelectedStage(stage);
+              setSelectedCta("activeDeals");
+            }}
+          />
         )}
 
         {selectedCta === "snapshot" && (
@@ -358,16 +364,20 @@
     );
   };
 
-  const DealFlowTotalsSection = ({ countsByStage }) => {
+  const DealFlowTotalsSection = ({ countsByStage, onStageSelect }) => {
     return (
       <section className="totals-section">
         <h2 className="section-title">Deal flow pipeline</h2>
         <div className="totals-grid">
           {dealStages.map((stage) => (
-            <div key={stage} className="total-card">
+            <button
+              key={stage}
+              className="total-card"
+              onClick={() => onStageSelect(stage)}
+            >
               <div className="total-label">{stage}</div>
               <div className="total-count">{countsByStage[stage] || 0}</div>
-            </div>
+            </button>
           ))}
         </div>
       </section>
