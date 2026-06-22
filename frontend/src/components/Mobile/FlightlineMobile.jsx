@@ -385,19 +385,11 @@
   };
 
   const TodaySnapshotSection = ({ deals }) => {
-    const todayDeals = deals.filter(deal => {
-      const dealDate = new Date(deal.createdAt);
-      const today = new Date();
-      return dealDate.toDateString() === today.toDateString();
-    });
-
     const metrics = {
-      totalDeals: todayDeals.length,
-      closedDeals: todayDeals.filter(d => d.status === 'closed').length,
-      revenue: todayDeals
-        .filter(d => d.status === 'closed')
-        .reduce((sum, d) => sum + (d.salePrice || 0), 0),
-      appointments: todayDeals.filter(d => d.appointmentTime).length
+      totalDeals: deals.length,
+      closedDeals: deals.filter(d => (d.probability || 0) >= 90).length,
+      revenue: deals.reduce((sum, d) => sum + (d.grossProfit || d.salePrice || 0), 0),
+      appointments: deals.filter(d => normalizeStage(d.status || d.stage) === 'Test Drive' || d.appointmentTime).length
     };
 
     return (
