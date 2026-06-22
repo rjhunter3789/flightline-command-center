@@ -251,9 +251,10 @@
   };
 
   const ActiveDealsSection = ({ selectedStage, onStageChange, deals, countsByStage }) => {
-    const handleDealClick = (dealId) => {
-      // Navigate to deal details
-      window.location.href = `/deal/${dealId}`;
+    const [selectedDeal, setSelectedDeal] = useState(null);
+
+    const handleDealClick = (deal) => {
+      setSelectedDeal(deal);
     };
 
     return (
@@ -280,6 +281,49 @@
           })}
         </div>
 
+        {selectedDeal && (
+          <div className="deal-card" style={{ borderColor: '#38bdf8', marginBottom: '1rem' }}>
+            <div className="deal-header">
+              <div className="deal-id">
+                {selectedDeal.stockNumber || selectedDeal.id} - {selectedDeal.customer?.name || selectedDeal.customerName || 'Unknown Customer'}
+              </div>
+              <button
+                className="stage-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedDeal(null);
+                }}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="deal-vehicle">
+              {(selectedDeal.vehicle?.year || selectedDeal.vehicleYear || '')} {(selectedDeal.vehicle?.make || selectedDeal.vehicleMake || '')} {(selectedDeal.vehicle?.model || selectedDeal.vehicleModel || '')}
+            </div>
+
+            <div className="deal-footer">
+              <span>Stage: {normalizeStage(selectedDeal.status || selectedDeal.stage)}</span>
+              <span>Time: {selectedDeal.timeInStage || `${calculateDealAge(selectedDeal.createdAt)} hrs`}</span>
+            </div>
+
+            <div className="deal-footer">
+              <span>Sales: {selectedDeal.salesperson || selectedDeal.salesRep || 'Unassigned'}</span>
+              <span>Urgency: {selectedDeal.urgency || 'normal'}</span>
+            </div>
+
+            <div className="deal-footer">
+              <span>Gross: {selectedDeal.grossProfit ? `$${selectedDeal.grossProfit.toLocaleString()}` : 'N/A'}</span>
+              <span>Payment: {selectedDeal.monthlyPayment ? `$${selectedDeal.monthlyPayment}/mo` : 'N/A'}</span>
+            </div>
+
+            <div className="deal-footer">
+              <span>Next: {selectedDeal.nextAction || 'Follow up'}</span>
+              <span>{selectedDeal.probability ? `${selectedDeal.probability}% close` : ''}</span>
+            </div>
+          </div>
+        )}
+
         {/* Deals List */}
         <div className="deals-list">
           {deals.length === 0 && (
@@ -292,7 +336,7 @@
             <button
               key={deal.id}
               className="deal-card"
-              onClick={() => handleDealClick(deal.id)}
+              onClick={() => handleDealClick(deal)}
             >
               <div className="deal-header">
                 <div className="deal-id">
