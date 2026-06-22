@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.2.0] - 2026-06-22
+
+### Added
+
+- Added Flightline Mobile MVP documentation: `docs/FLIGHTLINE-MOBILE-MVP-2026-06-22.md`.
+- Added mobile MVP status, known limitations, expected mobile flow, and recommended next-pass items.
+
+### Changed
+
+- Updated Flightline Mobile to align with the desktop 12-deal demo environment.
+- Updated mobile Active Deals behavior so tapping a customer/deal opens an in-page detail card instead of navigating to a fake `/deal/<id>` route.
+- Updated mobile Deal Flow Pipeline so stage cards are actionable and route back into Active Deals filtered by selected stage.
+- Updated Today's Snapshot mobile metrics so MVP values come from the active demo deal set instead of fields that were missing from desktop mock data.
+
+### Fixed
+
+- Fixed iPhone blank/dark mobile screen behavior.
+- Fixed mobile scrolling constraints.
+- Fixed mobile initial render by detecting mobile before first desktop render.
+- Disabled mobile WebSocket behavior for demo mode until authenticated pilot flow is ready.
+- Fixed misleading behavior where tapping a customer appeared to move that deal into Negotiation due to page reload and regenerated mock data.
+
 ## [2.1.0] - 2026-06-21
 
 ### Added
