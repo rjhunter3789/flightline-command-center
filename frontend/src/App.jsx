@@ -10,19 +10,26 @@
   import FlightlineMobile from './components/Mobile/FlightlineMobile';
   import './App.css';
 
+  const detectMobile = () => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
+    const width = window.innerWidth;
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileDevice = /mobile|android|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
+
+    return width <= 768 || isMobileDevice;
+  };
+
   function App() {
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(detectMobile);
 
     useEffect(() => {
-      // Check if device is mobile
       const checkMobile = () => {
-        const width = window.innerWidth;
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isMobileDevice = /mobile|android|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
-        setIsMobile(width <= 768 || isMobileDevice);
+        setIsMobile(detectMobile());
       };
 
-      checkMobile();
       window.addEventListener('resize', checkMobile);
       return () => window.removeEventListener('resize', checkMobile);
     }, []);
