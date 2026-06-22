@@ -1,6 +1,6 @@
 # Flightline Operations Runbook
 
-Last Updated: June 21, 2026
+Last Updated: June 22, 2026
 
 ## Normal Health Check
 
@@ -60,6 +60,36 @@ systemctl restart mongod
 systemctl status mongod --no-pager
 ss -ltnp | grep 27017
 ```
+
+## Frontend Build and Mobile Verification
+
+After frontend changes:
+
+```bash
+cd /var/www/flightline/frontend
+npm run build
+```
+
+Build result guidance:
+
+| Output | Meaning |
+|---|---|
+| `Compiled with warnings` and `The build folder is ready to be deployed` | Pass |
+| `Failed to compile` | Fail |
+
+Known current warnings are older dashboard lint warnings and are not blocking the build.
+
+After a successful mobile build, test `https://flightline.autoauditpro.io` on iPhone.
+
+Expected mobile MVP behavior:
+
+- Page loads without blank/dark screen.
+- Page scrolls normally.
+- Active Deals shows the desktop 12-deal demo source.
+- Stage pills filter Active Deals.
+- Deal Flow Pipeline cards jump to Active Deals filtered by selected stage.
+- Customer/deal tap opens an in-page detail card.
+- Today's Snapshot shows useful MVP metrics.
 
 ## Save PM2 State
 
