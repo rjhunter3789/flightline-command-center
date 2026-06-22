@@ -1,6 +1,6 @@
 # Flightline Troubleshooting
 
-Last Updated: June 21, 2026
+Last Updated: June 22, 2026
 
 ## Known Issue: Flightline Backend Crash Loop
 
@@ -136,6 +136,79 @@ snap list --all
 ```
 
 Do not delete app folders or credential-bearing folders without reviewing them first.
+
+## Known Issue: Mobile Blank/Dark Screen
+
+### Symptom
+
+On iPhone, `https://flightline.autoauditpro.io` shows a dark/blank screen or background without usable Flightline content.
+
+### Causes Found on June 22, 2026
+
+- App rendered desktop before mobile detection completed.
+- Mobile WebSocket behavior could create runtime risk before authenticated pilot flow was ready.
+- Global CSS used fixed height and hidden overflow, preventing normal mobile scrolling.
+
+### Fixes Applied
+
+- Mobile detection updated so Flightline Mobile renders on initial mobile load.
+- Mobile CSS updated to allow normal page height and vertical scrolling.
+- Mobile WebSocket behavior disabled for demo mode.
+
+### Verification
+
+```bash
+cd /var/www/flightline/frontend
+npm run build
+```
+
+Then open the site in a fresh iPhone Safari tab.
+
+Expected:
+
+- Flightline Mobile loads.
+- The page scrolls.
+- Active Deals appears.
+- Deal Flow Pipeline and Today's Snapshot are visible.
+
+## Known Issue: Mobile Deal Appears to Move Stages
+
+### Symptom
+
+Tapping a customer/deal appears to move that deal into Negotiation or another stage.
+
+### Cause
+
+The mobile deal card navigated to `/deal/<id>`, forcing the app to reload. The desktop mock data generator then regenerated random stages, which made the deal appear to move.
+
+### Fix Applied
+
+Mobile deal/customer tap now opens an in-page detail card instead of navigating away.
+
+Expected behavior:
+
+- Stage tap filters deals.
+- Deal/customer tap opens detail card.
+- Close returns to the same stage list.
+
+## Known Issue: Mobile Snapshot Shows Zeros
+
+### Symptom
+
+Today's Snapshot showed zero values for Total Deals, Closed, Revenue, and Appointments.
+
+### Cause
+
+The mobile snapshot used fields like `closed`, `salePrice`, `appointmentTime`, and same-day created dates. The desktop 12-deal demo source primarily uses fields such as `grossProfit`, `probability`, and stage.
+
+### Fix Applied
+
+Today's Snapshot now uses MVP calculations from the active demo deal set:
+
+- Total Deals: `deals.length`
+- Closed: deals with probability at or above 90%
+- Revenue: summed `grossProfit` or fallback `salePrice`
+- Appointments: Test Drive stage or `appointmentTime`
 
 ## Smart Doc
 
