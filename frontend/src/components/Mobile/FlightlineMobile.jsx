@@ -6,7 +6,6 @@
    */
 
   import React, { useState, useEffect } from 'react';
-  import { useWebSocket } from '../../hooks/useWebSocket';
   import './FlightlineMobile.css';
 
   const dealStages = [
@@ -95,7 +94,7 @@
     const [deals, setDeals] = useState(demoDeals);
     const [dealership, setDealership] = useState(demoDealership);
 
-    const socket = useWebSocket();
+    const socket = null; // Mobile MVP demo mode: live WebSocket disabled until authenticated pilot flow is ready
 
     useEffect(() => {
       // Fetch initial data
