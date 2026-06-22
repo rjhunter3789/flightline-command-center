@@ -6,6 +6,7 @@
    */
 
   import React, { useState, useEffect } from 'react';
+  import { useRealTimeData } from '../../hooks/useRealTimeData';
   import './FlightlineMobile.css';
 
   const dealStages = [
@@ -15,6 +16,15 @@
     "F&I Office"
   ];
 
+
+  const normalizeStage = (stage) => {
+    const value = String(stage || '').toLowerCase().replace(/&/g, '').replace(/\s+/g, '_');
+    if (value === 'test_drive') return 'Test Drive';
+    if (value === 'finance' || value === 'fi_office' || value === 'f_i_office') return 'F&I Office';
+    if (value === 'negotiation') return 'Negotiation';
+    if (value === 'showroom') return 'Showroom';
+    return stage || 'Unknown';
+  };
 
   const demoDeals = [
     {
@@ -91,7 +101,9 @@
   const FlightlineMobile = () => {
     const [selectedCta, setSelectedCta] = useState("activeDeals");
     const [selectedStage, setSelectedStage] = useState("Negotiation");
-    const [deals, setDeals] = useState(demoDeals);
+    const { deals: desktopDeals } = useRealTimeData();
+    const [mobileFallbackDeals, setDeals] = useState(demoDeals);
+    const deals = desktopDeals && desktopDeals.length ? desktopDeals : mobileFallbackDeals;
     const [dealership, setDealership] = useState(demoDealership);
 
     const socket = null; // Mobile MVP demo mode: live WebSocket disabled until authenticated pilot flow is ready
@@ -165,8 +177,10 @@
       }
     };
 
+    const getDealStage = (deal) => normalizeStage(deal.status || deal.stage);
+
     const getDealsForStage = (stage) => {
-      return deals.filter(deal => deal.status === stage || deal.stage === stage);
+      return deals.filter(deal => getDealStage(deal) === stage);
     };
 
     const countsByStage = dealStages.reduce((acc, stage) => {
@@ -282,16 +296,16 @@
             >
               <div className="deal-header">
                 <div className="deal-id">
-                  {deal.stockNumber} - {deal.customer?.name || 'Unknown Customer'}
+                  {deal.stockNumber || deal.id} - {deal.customer?.name || deal.customerName || 'Unknown Customer'}
                 </div>
-                <div className="deal-stage">{deal.status || deal.stage}</div>
+                <div className="deal-stage">{normalizeStage(deal.status || deal.stage)}</div>
               </div>
               <div className="deal-vehicle">
-                {deal.vehicle?.year} {deal.vehicle?.make} {deal.vehicle?.model}
+                {deal.vehicle?.year || deal.vehicleYear} {deal.vehicle?.make || deal.vehicleMake} {deal.vehicle?.model || deal.vehicleModel}
               </div>
               <div className="deal-footer">
-                <span>Sales: {deal.salesperson || 'Unassigned'}</span>
-                <span>Age: {calculateDealAge(deal.createdAt)} hrs</span>
+                <span>Sales: {deal.salesperson || deal.salesRep || 'Unassigned'}</span>
+                <span>Stage Time: {deal.timeInStage || `${calculateDealAge(deal.createdAt)} hrs`}</span>
               </div>
             </button>
           ))}
@@ -360,7 +374,7 @@
   const StaffActivitySection = ({ deals }) => {
     // Group deals by salesperson
     const staffMetrics = deals.reduce((acc, deal) => {
-      const staff = deal.salesperson || 'Unassigned';
+      const staff = deal.salesperson || deal.salesRep || 'Unassigned';
       if (!acc[staff]) {
         acc[staff] = {
           name: staff,
