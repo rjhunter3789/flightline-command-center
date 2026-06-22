@@ -16,6 +16,51 @@
     "F&I Office"
   ];
 
+
+  const demoDeals = [
+    {
+      id: "demo-1001",
+      stockNumber: "F-1001",
+      status: "Negotiation",
+      stage: "Negotiation",
+      createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+      customer: { name: "Demo Customer" },
+      vehicle: { year: 2025, make: "Ford", model: "F-150" },
+      salesperson: "Alex Morgan",
+      salePrice: 52500,
+      appointmentTime: new Date().toISOString(),
+      interactions: [{ type: "note" }, { type: "manager-review" }]
+    },
+    {
+      id: "demo-1002",
+      stockNumber: "F-1002",
+      status: "Test Drive",
+      stage: "Test Drive",
+      createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+      customer: { name: "Showroom Guest" },
+      vehicle: { year: 2025, make: "Ford", model: "Explorer" },
+      salesperson: "Jamie Lee",
+      salePrice: 0,
+      interactions: [{ type: "test-drive" }]
+    },
+    {
+      id: "demo-1003",
+      stockNumber: "F-1003",
+      status: "F&I Office",
+      stage: "F&I Office",
+      createdAt: new Date(Date.now() - 1000 * 60 * 135).toISOString(),
+      customer: { name: "Delivery Pending" },
+      vehicle: { year: 2024, make: "Ford", model: "Bronco Sport" },
+      salesperson: "Taylor Smith",
+      salePrice: 38400,
+      interactions: [{ type: "finance" }, { type: "docs" }, { type: "delivery" }]
+    }
+  ];
+
+  const demoDealership = {
+    name: "Flightline Demo"
+  };
+
   const primaryCtas = [
     {
       id: "activeDeals",
@@ -47,8 +92,8 @@
   const FlightlineMobile = () => {
     const [selectedCta, setSelectedCta] = useState("activeDeals");
     const [selectedStage, setSelectedStage] = useState("Negotiation");
-    const [deals, setDeals] = useState([]);
-    const [dealership, setDealership] = useState(null);
+    const [deals, setDeals] = useState(demoDeals);
+    const [dealership, setDealership] = useState(demoDealership);
 
     const socket = useWebSocket();
 
@@ -139,7 +184,7 @@
             <p className="mobile-subtitle">Mobile command for deal flow</p>
           </div>
           <span className="dealer-badge">
-            {dealership?.name || 'Loading...'}
+            {dealership?.name || 'Flightline Demo'}
           </span>
         </header>
 
