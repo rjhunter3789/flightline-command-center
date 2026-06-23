@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.3.0] - 2026-06-23
+
+### Added
+
+- Added Flight Attendant Voice Briefing v1 documentation: `docs/FLIGHTLINE-FLIGHT-ATTENDANT-VOICE-BRIEFING-2026-06-23.md`.
+- Added read-only Flight Attendant status-board briefing notes for Active Deals, Deal Flow, Today's Snapshot, and What Needs Attention.
+
+### Confirmed
+
+- Flight Attendant panel is visible in Flightline Mobile.
+- Preset briefing buttons generate written status summaries.
+- Speak Briefing reads the current Flightline status briefing out loud using browser speech synthesis.
+- Flight Attendant Voice Briefing v1 is confirmed working as a proof of concept.
+
+### Known Limitation
+
+- Native browser voice quality is not acceptable for production.
+- The next voice pass should improve voice selection, shorten spoken scripts, add stop controls, and prepare for premium TTS.
+- Microphone input is not implemented yet.
+- Flight Attendant remains read-only with no write actions.
+
 ## [2.2.0] - 2026-06-22
 
 ### Added
