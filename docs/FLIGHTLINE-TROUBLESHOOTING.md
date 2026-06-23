@@ -1,6 +1,6 @@
 # Flightline Troubleshooting
 
-Last Updated: June 22, 2026
+Last Updated: June 23, 2026
 
 ## Known Issue: Flightline Backend Crash Loop
 
@@ -209,6 +209,30 @@ Today's Snapshot now uses MVP calculations from the active demo deal set:
 - Closed: deals with probability at or above 90%
 - Revenue: summed `grossProfit` or fallback `salePrice`
 - Appointments: Test Drive stage or `appointmentTime`
+
+## Known Issue: Flight Attendant Voice Quality
+
+### Symptom
+
+Flight Attendant successfully reads the Flightline status briefing out loud, but the voice sounds low-quality and robotic.
+
+### Cause
+
+Flight Attendant v1 uses the browser's built-in speech synthesis engine. This is useful for proving the readout workflow, but it is not a production-quality voice layer.
+
+### Current Status
+
+- Written briefing generation works.
+- Speak Briefing works.
+- Native browser voice quality is not acceptable for production.
+
+### Next Fix Direction
+
+- Improve voice selection where available.
+- Tune rate and pitch.
+- Shorten spoken briefing scripts.
+- Add a stop speaking button.
+- Prepare premium TTS such as ElevenLabs or a Nova-quality voice service.
 
 ## Smart Doc
 
