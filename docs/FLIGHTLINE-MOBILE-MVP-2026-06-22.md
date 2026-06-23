@@ -19,6 +19,8 @@ The goal of this pass was to make the mobile experience usable on iPhone, align 
 | Deal Flow Pipeline | Stage cards are actionable |
 | Deal/customer tap | Opens in-page mobile detail card |
 | Today's Snapshot | Shows useful MVP metrics |
+| Flight Attendant Voice Briefing | Confirmed working as read-only proof of concept |
+| Native browser voice quality | Not acceptable for production |
 | Git status | Clean and pushed after updates |
 
 ## Key Commits
@@ -33,6 +35,8 @@ The goal of this pass was to make the mobile experience usable on iPhone, align 
 | `330a836` | Open mobile deal details in place |
 | `8c4ceee` | Make mobile pipeline stages actionable |
 | `2ce05a4` | Show useful mobile snapshot metrics |
+| `0ce2a6b` | Add Flight Attendant mobile briefing component |
+| `6be7c7c` | Style Flight Attendant mobile briefing |
 
 ## Problem Summary
 
@@ -134,16 +138,45 @@ Today's Snapshot now shows MVP-useful demo metrics:
 | Revenue | Sum of `grossProfit` or fallback `salePrice` |
 | Appointments | Test Drive stage deals or deals with `appointmentTime` |
 
+## Flight Attendant Voice Briefing v1
+
+Flight Attendant Voice Briefing v1 was added after the core mobile MVP was stable.
+
+Confirmed working:
+
+- Flight Attendant panel appears near the top of Flightline Mobile.
+- Active Deal Summary generates a written status-board summary.
+- Deal Flow Summary generates a written pipeline summary.
+- Today's Snapshot generates a written snapshot summary.
+- What Needs Attention generates a manager-priority summary.
+- Speak Briefing reads the current summary out loud using browser speech synthesis.
+
+Important limitation:
+
+- Browser speech readout works, but native browser voice quality is not acceptable for production.
+
+Production direction:
+
+- Improve native voice selection where possible.
+- Shorten spoken scripts for quick manager briefings.
+- Add stop speaking control.
+- Prepare premium TTS such as ElevenLabs or a Nova-quality voice service.
+- Add microphone input later only after the read-only briefing layer remains stable.
+
 ## Current Expected Mobile Flow
 
 1. Open `https://flightline.autoauditpro.io` on iPhone.
 2. Flightline Mobile loads.
-3. Active Deals shows stage filters and demo deal cards.
-4. Deal Flow Pipeline cards navigate into matching Active Deals stage.
-5. Customer/deal tap opens in-place detail card.
-6. Today's Snapshot shows meaningful demo metrics.
-7. Staff Activity groups deals by salesperson.
-8. Chat & Sentiment remains placeholder/MVP-level.
+3. Flight Attendant panel appears near the top.
+4. Tap a Flight Attendant briefing button.
+5. Confirm the written briefing updates.
+6. Tap Speak Briefing to hear the current briefing.
+7. Active Deals shows stage filters and demo deal cards.
+8. Deal Flow Pipeline cards navigate into matching Active Deals stage.
+9. Customer/deal tap opens in-place detail card.
+10. Today's Snapshot shows meaningful demo metrics.
+11. Staff Activity groups deals by salesperson.
+12. Chat & Sentiment remains placeholder/MVP-level.
 
 ## Known Limitations
 
@@ -152,15 +185,21 @@ Today's Snapshot now shows MVP-useful demo metrics:
 - Live dealership/CRM/DMS integrations are not connected.
 - Mobile WebSocket behavior is intentionally disabled until authenticated pilot flow is ready.
 - Today's Snapshot uses MVP/demo calculations, not final production dealership metrics.
+- Flight Attendant is read-only and cannot change deals, send messages, or write to CRM.
+- Flight Attendant microphone input is not implemented yet.
+- Flight Attendant uses native browser speech, which is not production quality.
 - Chat & Sentiment remains placeholder behavior.
 - Desktop build warnings still exist in older dashboard components.
 
 ## Recommended Next Pass
 
-1. Mobile visual polish to better match Flightline desktop.
-2. Improve customer/deal detail screen.
-3. Add sticky bottom navigation or command tabs.
-4. Add mobile priority alert section.
-5. Clean up older frontend build warnings.
-6. Create authenticated pilot flow before re-enabling live WebSocket behavior on mobile.
-7. Decide whether mobile snapshot cards should become fully actionable.
+1. Improve Flight Attendant native voice selection and add stop speaking.
+2. Prepare premium TTS integration.
+3. Add a shorter manager briefing mode.
+4. Mobile visual polish to better match Flightline desktop.
+5. Improve customer/deal detail screen.
+6. Add sticky bottom navigation or command tabs.
+7. Add mobile priority alert section.
+8. Clean up older frontend build warnings.
+9. Create authenticated pilot flow before re-enabling live WebSocket behavior on mobile.
+10. Decide whether mobile snapshot cards should become fully actionable.
