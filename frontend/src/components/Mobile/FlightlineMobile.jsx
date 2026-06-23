@@ -8,6 +8,7 @@
   import React, { useState, useEffect } from 'react';
   import { useRealTimeData } from '../../hooks/useRealTimeData';
   import './FlightlineMobile.css';
+import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
 
   const dealStages = [
     "Showroom",
@@ -419,13 +420,16 @@
     };
 
     const stopSpeaking = () => {
+      stopPremiumFlightAttendantAudio();
+
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        setVoiceStatus('Speech stopped');
       }
+
+      setVoiceStatus('Speech stopped');
     };
 
-    const speakBriefing = () => {
+    const speakWithNativeBrowserVoice = () => {
       if (!('speechSynthesis' in window)) {
         setBriefing(`${briefing} Voice readout is not supported in this browser.`);
         return;
@@ -447,6 +451,22 @@
       utterance.onend = () => setVoiceStatus(preferredVoice ? `Voice: ${preferredVoice.name}` : 'Native browser voice');
       utterance.onerror = () => setVoiceStatus('Voice readout stopped or unavailable');
       window.speechSynthesis.speak(utterance);
+    };
+
+    const speakBriefing = async () => {
+      stopPremiumFlightAttendantAudio();
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      await playPremiumFlightAttendantBriefing({
+        briefingType: activeBriefing || 'activeDeals',
+        mode: briefingMode,
+        text: briefing,
+        onStatus: setVoiceStatus,
+        onFallback: speakWithNativeBrowserVoice
+      });
     };
 
     return (
