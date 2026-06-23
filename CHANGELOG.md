@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.3.1] - 2026-06-23
+
+### Confirmed
+
+- Flight Attendant Voice Briefing v1.1 confirmed working on Flightline Mobile.
+- Short briefing mode works.
+- Standard briefing mode works.
+- Speak Briefing works.
+- Stop Speaking works.
+- Voice/status line works.
+- Native browser voice selection works as far as Safari/browser support allows.
+- Frontend build passed with existing non-blocking dashboard warnings.
+
+### Changed
+
+- Added Short / Standard briefing mode.
+- Added Stop Speaking control.
+- Added visible browser voice/status line.
+- Tuned browser speech rate and pitch to make native speech less harsh.
+- Kept Flight Attendant read-only with no backend dependency.
+
+### Still Deferred
+
+- Premium TTS integration.
+- Microphone input.
+- CRM/DMS write actions.
+- External system access.
+
 ## [2.3.0] - 2026-06-23
 
 ### Added
