@@ -44,6 +44,58 @@
     background-color: #1e293b; /* slate-800 */
   }
 
+  /* Flight Attendant Styles */
+  .flight-attendant-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flight-attendant-card {
+    border-radius: 18px;
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    background: linear-gradient(135deg, rgba(8, 47, 73, 0.72), rgba(15, 23, 42, 0.96));
+    padding: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .flight-attendant-script {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #e0f2fe;
+  }
+
+  .flight-attendant-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .flight-attendant-button,
+  .flight-attendant-speak {
+    border-radius: 9999px;
+    border: 1px solid #334155;
+    background-color: #0f172a;
+    color: #cbd5e1;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms;
+  }
+
+  .flight-attendant-button.active,
+  .flight-attendant-speak:active {
+    border-color: #22d3ee;
+    background-color: rgba(34, 211, 238, 0.12);
+    color: #67e8f9;
+  }
+
+  .flight-attendant-button:active {
+    transform: scale(0.98);
+  }
+
   /* CTA Section Styles */
   .cta-section {
     margin-top: 8px;
