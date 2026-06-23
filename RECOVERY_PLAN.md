@@ -1,6 +1,6 @@
 # Flightline Recovery Plan
 
-Last Updated: June 21, 2026
+Last Updated: June 22, 2026
 
 ## Current Server Information
 
@@ -15,6 +15,7 @@ Last Updated: June 21, 2026
 | Backend port | `3001` |
 | Database | Local MongoDB on `127.0.0.1:27017` |
 | GitHub repo | `rjhunter3789/flightline-command-center` |
+| Mobile MVP | Working on iPhone using the desktop 12-deal demo source |
 
 ## Desired PM2 State
 
@@ -67,7 +68,7 @@ pm2 restart flightline-backend
 pm2 status
 ```
 
-## Known June 2026 Failure Pattern
+## Known June 2026 Backend Failure Pattern
 
 Flightline was crash-looping because MongoDB was down after an OOM kill. The server had no swap at the time.
 
@@ -78,6 +79,27 @@ Corrective actions completed:
 - Restarted Flightline.
 - Left Smart Doc stopped.
 - Fixed Mongoose shutdown handler.
+
+## Known June 2026 Mobile Failure Pattern
+
+Flightline Mobile had several MVP readiness issues:
+
+- iPhone could show a blank/dark screen.
+- Mobile scroll behavior was blocked by fixed-height/hidden-overflow CSS.
+- Mobile initially used a separate 3-deal fallback instead of the desktop 12-deal demo source.
+- Tapping a deal navigated to `/deal/<id>`, causing reload and regenerated random mock data.
+- Deal Flow Pipeline stage cards were display-only.
+- Today's Snapshot showed zeros because it was reading fields not present in the desktop mock data.
+
+Corrective actions completed:
+
+- Mobile render path corrected for initial iPhone load.
+- Mobile scrolling corrected.
+- Mobile WebSocket behavior disabled for demo mode.
+- Mobile now uses the same desktop `useRealTimeData()` 12-deal demo source.
+- Mobile deal/customer tap opens an in-page detail card.
+- Mobile Deal Flow Pipeline stage cards navigate into Active Deals by selected stage.
+- Today's Snapshot now shows MVP metrics from the active deal set.
 
 ## Mongoose Shutdown Handler
 
@@ -133,3 +155,4 @@ Start with:
 - `docs/FLIGHTLINE-OPERATIONS-RUNBOOK.md`
 - `docs/FLIGHTLINE-TROUBLESHOOTING.md`
 - `docs/FLIGHTLINE-RECOVERY-2026-06-21.md`
+- `docs/FLIGHTLINE-MOBILE-MVP-2026-06-22.md`
