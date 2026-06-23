@@ -66,14 +66,28 @@
     color: #e0f2fe;
   }
 
+  .flight-attendant-voice-status {
+    margin: 8px 0 0 0;
+    font-size: 10px;
+    color: #93c5fd;
+  }
+
   .flight-attendant-actions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
 
+  .flight-attendant-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr;
+    gap: 8px;
+  }
+
   .flight-attendant-button,
-  .flight-attendant-speak {
+  .flight-attendant-speak,
+  .flight-attendant-toggle,
+  .flight-attendant-stop {
     border-radius: 9999px;
     border: 1px solid #334155;
     background-color: #0f172a;
@@ -86,13 +100,21 @@
   }
 
   .flight-attendant-button.active,
+  .flight-attendant-toggle.active,
   .flight-attendant-speak:active {
     border-color: #22d3ee;
     background-color: rgba(34, 211, 238, 0.12);
     color: #67e8f9;
   }
 
-  .flight-attendant-button:active {
+  .flight-attendant-stop {
+    border-color: rgba(248, 113, 113, 0.5);
+    color: #fecaca;
+  }
+
+  .flight-attendant-button:active,
+  .flight-attendant-toggle:active,
+  .flight-attendant-stop:active {
     transform: scale(0.98);
   }
 
