@@ -1,6 +1,6 @@
 # Flightline Git and Deployment
 
-Last Updated: June 22, 2026
+Last Updated: June 23, 2026
 
 ## Repository
 
@@ -129,6 +129,41 @@ Mobile MVP expected behavior after build:
 - Deal/customer tap opens an in-page detail card.
 - Today's Snapshot shows MVP metrics.
 
+## Flight Attendant Deployment Notes
+
+Flight Attendant Voice Briefing v1 is a frontend-only mobile feature.
+
+Important files:
+
+- `frontend/src/components/Mobile/FlightlineMobile.jsx`
+- `frontend/src/components/Mobile/FlightlineMobile.css`
+
+Build and verification:
+
+```bash
+cd /var/www/flightline/frontend
+npm run build
+```
+
+Expected build result:
+
+```text
+Compiled with warnings.
+The build folder is ready to be deployed.
+```
+
+Expected feature behavior:
+
+- Flight Attendant panel appears near the top of Flightline Mobile.
+- Preset briefing buttons update the written status summary.
+- Speak Briefing reads the current summary using browser speech synthesis.
+- No PM2 restart is needed for this frontend-only change.
+
+Known production limitation:
+
+- Native browser voice quality is not acceptable for production.
+- Future work should improve native voice selection and prepare premium TTS.
+
 ## PM2 State
 
 Save PM2 state after intentionally changing process status:
@@ -166,3 +201,5 @@ Do not commit secrets, credentials, private tokens, or raw environment files.
 - Smart Doc is retired/shelved and should remain stopped.
 - Auto Audit Pro is a separate production PM2 process named `auto-audit`.
 - Flightline Mobile MVP is currently usable on iPhone and should be treated as the active MVP mobile path.
+- Flight Attendant Voice Briefing v1 is confirmed working as a read-only proof of concept.
+- Flight Attendant browser voice quality is not production-ready.
