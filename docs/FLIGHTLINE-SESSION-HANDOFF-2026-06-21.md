@@ -1,8 +1,8 @@
-# Flightline Session Handoff - June 21, 2026
+# Flightline Session Handoff - June 21-22, 2026
 
 ## Purpose
 
-This handoff preserves the key decisions, commands, recovery work, and documentation updates from the Flightline stabilization session.
+This handoff preserves the key decisions, commands, recovery work, documentation updates, and mobile MVP updates from the Flightline stabilization work.
 
 ## Final Confirmed State
 
@@ -11,9 +11,10 @@ This handoff preserves the key decisions, commands, recovery work, and documenta
 | Server | `autoauditpro` DigitalOcean server |
 | Flightline path | `/var/www/flightline` |
 | GitHub repo | `rjhunter3789/flightline-command-center` |
-| Git status | Clean and up to date with `origin/main` |
+| Git status | Clean and up to date with `origin/main` after server pulls latest docs/code |
 | Auto Audit Pro | Online in PM2 as `auto-audit` |
 | Flightline | Online in PM2 as `flightline-backend` |
+| Flightline Mobile | Working mobile MVP on iPhone |
 | Smart Doc | Stopped in PM2 as `smart-doc-v2` |
 | MongoDB | Active and running |
 | Swap | 2GB active and persistent at `/swapfile` |
@@ -47,6 +48,30 @@ This handoff preserves the key decisions, commands, recovery work, and documenta
 - Saved PM2 state.
 - Left Smart Doc stopped to reduce memory pressure.
 
+### Flightline Mobile MVP Update
+
+The June 22, 2026 mobile pass changed Flightline Mobile from a lightweight/partial shell into a usable MVP mobile path.
+
+Completed mobile fixes:
+
+- Resolved iPhone blank/dark screen.
+- Restored mobile scrolling.
+- Ensured mobile renders on initial mobile load instead of briefly rendering desktop first.
+- Disabled mobile WebSocket behavior for demo mode.
+- Connected mobile to the same desktop `useRealTimeData()` 12-deal demo source.
+- Kept fallback demo data only as an emergency fallback.
+- Normalized desktop stages into mobile labels.
+- Changed deal/customer tap from route navigation to an in-page detail card.
+- Made Deal Flow Pipeline stage cards actionable.
+- Updated Today's Snapshot to show useful MVP metrics.
+
+Expected mobile behavior now:
+
+- Active Deals stage pills filter by stage.
+- Deal Flow Pipeline cards jump back to Active Deals filtered by selected stage.
+- Customer/deal tap opens a detail card in place.
+- Today's Snapshot shows deal count, demo close estimate, gross opportunity, and appointment/test-drive count.
+
 ### Documentation Updates
 
 Created or updated the following files:
@@ -56,6 +81,7 @@ Created or updated the following files:
 - `docs/FLIGHTLINE-OPERATIONS-RUNBOOK.md`
 - `docs/FLIGHTLINE-TROUBLESHOOTING.md`
 - `docs/FLIGHTLINE-RECOVERY-2026-06-21.md`
+- `docs/FLIGHTLINE-MOBILE-MVP-2026-06-22.md`
 - `docs/FLIGHTLINE-GIT-AND-DEPLOYMENT.md`
 - `docs/FLIGHTLINE-SMART-DOC-RETIREMENT-NOTE.md`
 - `CHANGELOG.md`
@@ -80,7 +106,7 @@ Final MongoDB state:
 Final Git state:
 
 - Branch: `main`
-- Up to date with `origin/main`
+- Up to date with `origin/main` after pulling latest GitHub documentation updates
 - Working tree clean
 
 ## Important Lessons
@@ -91,10 +117,12 @@ Final Git state:
 4. Smart Doc should remain stopped unless intentionally revived.
 5. Long-term, consider resizing the droplet before adding Nova or reactivating additional services.
 6. Avoid pasting large heredoc blocks into SSH; GitHub direct updates were safer.
+7. Mobile should use the same demo data source as desktop, not a separate watered-down fallback.
+8. Mobile MVP behavior should be a phone layout of Flightline, not a separate mini-app.
 
 ## Recommended Next Session
 
-The next clean follow-up is to create a broader AAP server architecture document that maps:
+The next clean follow-up is to polish Flightline Mobile visually and create a broader AAP server architecture document that maps:
 
 - Auto Audit Pro
 - Flightline
@@ -105,6 +133,14 @@ The next clean follow-up is to create a broader AAP server architecture document
 - Nginx routing
 - GitHub repositories
 - Resize/snapshot plan
+
+Mobile next-pass items:
+
+- Improve mobile customer/deal detail screen.
+- Add sticky bottom navigation or command tabs.
+- Add mobile priority alert section.
+- Clean up older frontend build warnings.
+- Create authenticated pilot access before re-enabling mobile WebSocket behavior.
 
 ## Commands Worth Keeping
 
@@ -124,6 +160,13 @@ Pull latest Flightline docs/code:
 cd /var/www/flightline
 git pull
 git status
+```
+
+Build frontend after frontend changes:
+
+```bash
+cd /var/www/flightline/frontend
+npm run build
 ```
 
 Do not restart Smart Doc unless needed:
