@@ -1,6 +1,6 @@
 # Flightline Operations Runbook
 
-Last Updated: June 22, 2026
+Last Updated: June 23, 2026
 
 ## Normal Health Check
 
@@ -85,11 +85,39 @@ Expected mobile MVP behavior:
 
 - Page loads without blank/dark screen.
 - Page scrolls normally.
+- Flight Attendant panel appears near the top.
+- Flight Attendant briefing buttons update the written summary.
+- Speak Briefing reads the current summary out loud.
 - Active Deals shows the desktop 12-deal demo source.
 - Stage pills filter Active Deals.
 - Deal Flow Pipeline cards jump to Active Deals filtered by selected stage.
 - Customer/deal tap opens an in-page detail card.
 - Today's Snapshot shows useful MVP metrics.
+
+## Flight Attendant Verification
+
+Flight Attendant v1 is frontend-only and read-only.
+
+Test steps:
+
+1. Open Flightline Mobile.
+2. Tap Active Deal Summary.
+3. Confirm written briefing updates.
+4. Tap Speak Briefing.
+5. Confirm browser speech reads the briefing.
+6. Repeat with Deal Flow Summary, Today's Snapshot, and What Needs Attention.
+
+Expected result:
+
+- Briefing text updates.
+- Browser speech readout works.
+- No backend restart is required.
+
+Known limitation:
+
+- Native browser voice quality is poor and not acceptable for production.
+
+Next voice pass should improve voice selection, add a stop speaking control, shorten scripts, and prepare premium TTS.
 
 ## Save PM2 State
 
