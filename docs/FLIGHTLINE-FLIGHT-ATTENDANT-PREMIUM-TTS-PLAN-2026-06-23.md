@@ -17,7 +17,8 @@ Flight Attendant v1.1 is the stable native-browser baseline. The next major voic
 | Stop Speaking | Working |
 | Voice/status line | Working |
 | Native browser voice | Usable for proof of concept only |
-| Premium voice | Not implemented |
+| Backend voice stub | Confirmed working |
+| Premium voice provider | Not implemented |
 | Microphone input | Not implemented |
 | Write actions | Not implemented and intentionally excluded |
 
@@ -143,7 +144,7 @@ Premium voice is unavailable right now. Using device voice.
 
 ### Phase 1 - Planning / Documentation
 
-Status: current.
+Status: complete.
 
 - Confirm premium voice architecture.
 - Keep sensitive provider configuration server-side.
@@ -152,12 +153,35 @@ Status: current.
 
 ### Phase 2 - Backend Voice Stub
 
-- Add backend voice route.
-- Add provider module stub.
-- Return clear provider-not-configured response when premium voice is not configured.
-- Confirm frontend fallback still works.
+Status: complete and confirmed working.
+
+Implemented:
+
+- Added backend route file: `backend/src/routes/flightAttendantRoutes.js`.
+- Registered route under `/api/flight-attendant`.
+- Added `GET /api/flight-attendant/tts/status`.
+- Added `POST /api/flight-attendant/tts`.
+- Added validation for briefing text.
+- Added oversized-text rejection.
+- Added unsupported briefing type rejection.
+- Added unsupported mode rejection.
+- Added provider-not-configured response.
+- Preserved fallback behavior.
+
+Confirmed:
+
+- Route syntax check passed.
+- Server syntax check passed.
+- PM2 restart succeeded.
+- Status endpoint returned configured false and fallback allowed.
+- POST endpoint returned premium voice not configured and fallback allowed.
+- Unsupported briefing type was rejected.
+- Oversized briefing text was rejected.
+- Backend remained online.
 
 ### Phase 3 - Provider Integration
+
+Status: next major backend step.
 
 - Add selected provider integration.
 - Return playable audio to frontend.
@@ -178,23 +202,10 @@ Status: current.
 - Add usage logging.
 - Add cost monitoring.
 
-## Recommended Next Build Step
-
-The next build step should be Phase 2: backend voice stub.
-
-This allows Flightline to prepare the correct architecture without committing to a provider.
-
-Phase 2 acceptance criteria:
-
-- Backend voice route exists.
-- Route rejects oversized text.
-- Route returns a clear provider-not-configured response when premium voice is unavailable.
-- No secrets are committed.
-- Frontend still uses native browser speech as fallback.
-- Backend runtime remains stable.
-
 ## Current Recommendation
 
-Proceed with backend voice stub before integrating ElevenLabs, OpenAI, or any other premium voice provider.
+Phase 2 is complete. The backend now has a safe voice stub that prepares the premium voice architecture without exposing credentials or committing to a provider.
 
-The stub gives Flightline a safe foundation and prevents a rushed provider integration from creating security, privacy, or cost problems.
+The next major build step should be provider selection and provider integration planning.
+
+Do not add microphone input or write actions yet.
