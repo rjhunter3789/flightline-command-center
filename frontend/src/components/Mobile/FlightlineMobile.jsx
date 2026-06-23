@@ -287,7 +287,27 @@
       .slice(0, 3);
   };
 
-  const buildFlightAttendantBriefing = (type, deals, countsByStage) => {
+  const choosePreferredVoice = (voices) => {
+    if (!voices || !voices.length) return null;
+
+    const preferredNames = [
+      'Samantha',
+      'Karen',
+      'Moira',
+      'Tessa',
+      'Daniel',
+      'Google US English',
+      'Microsoft Jenny',
+      'Microsoft Aria'
+    ];
+
+    return voices.find((voice) => preferredNames.some((name) => voice.name.includes(name)))
+      || voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith('en-us'))
+      || voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith('en'))
+      || voices[0];
+  };
+
+  const buildFlightAttendantBriefing = (type, deals, countsByStage, mode = 'standard') => {
     const totalDeals = deals.length;
     const showroom = countsByStage.Showroom || 0;
     const testDrive = countsByStage['Test Drive'] || 0;
@@ -299,12 +319,17 @@
     const appointments = deals.filter((deal) => normalizeStage(deal.status || deal.stage) === 'Test Drive' || deal.appointmentTime).length;
     const highestGrossDeal = getHighestGrossDeal(deals);
     const attentionDeals = getAttentionDeals(deals);
+    const isShort = mode === 'short';
 
     if (!totalDeals) {
-      return 'Flight Attendant briefing: there are currently no active deals on the board.';
+      return 'Flight Attendant: no active deals are currently on the board.';
     }
 
     if (type === 'activeDeals') {
+      if (isShort) {
+        return `Active deals: ${totalDeals} total. Showroom ${showroom}, Test Drive ${testDrive}, Negotiation ${negotiation}, F&I ${finance}. ${highUrgency ? `${highUrgency} high urgency.` : 'No high urgency flags.'}`;
+      }
+
       const topLine = `Flight Attendant active deal summary: you currently have ${totalDeals} active deals. Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}.`;
       const urgencyLine = highUrgency ? `There are ${highUrgency} high urgency deals on the board.` : 'There are no high urgency deals flagged right now.';
       const topDealLine = highestGrossDeal
@@ -315,19 +340,35 @@
 
     if (type === 'dealFlow') {
       const busiestStage = Object.entries(countsByStage).sort((a, b) => b[1] - a[1])[0];
+
+      if (isShort) {
+        return `Deal flow: Showroom ${showroom}, Test Drive ${testDrive}, Negotiation ${negotiation}, F&I ${finance}. Busiest stage: ${busiestStage?.[0] || 'unknown'}.`;
+      }
+
       return `Flight Attendant deal flow summary: Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}. The busiest stage right now is ${busiestStage?.[0] || 'unknown'} with ${busiestStage?.[1] || 0} deals.`;
     }
 
     if (type === 'snapshot') {
+      if (isShort) {
+        return `Snapshot: ${totalDeals} active deals, ${highProbability} high probability, ${appointments} appointment or test drive opportunities, $${revenue.toLocaleString()} gross opportunity.`;
+      }
+
       return `Flight Attendant today's snapshot: you have ${totalDeals} active deals, ${highProbability} high probability deals, ${appointments} appointment or test drive opportunities, and approximately $${revenue.toLocaleString()} in gross opportunity on the board.`;
     }
 
     if (type === 'attention') {
       if (!attentionDeals.length) {
-        return `Flight Attendant attention summary: the board looks stable. You have ${totalDeals} active deals and no obvious high urgency items flagged.`;
+        return isShort
+          ? `Attention: board looks stable. ${totalDeals} active deals, no obvious high urgency items.`
+          : `Flight Attendant attention summary: the board looks stable. You have ${totalDeals} active deals and no obvious high urgency items flagged.`;
       }
 
       const firstDeal = attentionDeals[0];
+
+      if (isShort) {
+        return `Attention: start with ${getCustomerName(firstDeal)}, ${normalizeStage(firstDeal.status || firstDeal.stage)}, ${getDealTimeLabel(firstDeal)} in stage.`;
+      }
+
       const firstLine = `Flight Attendant attention summary: I would start with ${getCustomerName(firstDeal)} on the ${getVehicleLabel(firstDeal)}, currently in ${normalizeStage(firstDeal.status || firstDeal.stage)} for ${getDealTimeLabel(firstDeal)}.`;
       const followUpLine = attentionDeals.length > 1
         ? `There are ${attentionDeals.length} deals worth a manager look right now.`
@@ -341,10 +382,47 @@
   const FlightAttendantSection = ({ deals, countsByStage }) => {
     const [briefing, setBriefing] = useState('Flight Attendant is ready. Choose a briefing below.');
     const [activeBriefing, setActiveBriefing] = useState(null);
+    const [briefingMode, setBriefingMode] = useState('short');
+    const [availableVoices, setAvailableVoices] = useState([]);
+    const [voiceStatus, setVoiceStatus] = useState('Native browser voice');
 
-    const handleBriefing = (type) => {
+    useEffect(() => {
+      if (!('speechSynthesis' in window)) return;
+
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        setAvailableVoices(voices);
+        const preferredVoice = choosePreferredVoice(voices);
+        if (preferredVoice) {
+          setVoiceStatus(`Voice: ${preferredVoice.name}`);
+        }
+      };
+
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      return () => {
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    }, []);
+
+    const handleBriefing = (type, mode = briefingMode) => {
       setActiveBriefing(type);
-      setBriefing(buildFlightAttendantBriefing(type, deals, countsByStage));
+      setBriefing(buildFlightAttendantBriefing(type, deals, countsByStage, mode));
+    };
+
+    const handleModeChange = (mode) => {
+      setBriefingMode(mode);
+      if (activeBriefing) {
+        handleBriefing(activeBriefing, mode);
+      }
+    };
+
+    const stopSpeaking = () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        setVoiceStatus('Speech stopped');
+      }
     };
 
     const speakBriefing = () => {
@@ -355,8 +433,19 @@
 
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(briefing);
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
+      const preferredVoice = choosePreferredVoice(availableVoices.length ? availableVoices : window.speechSynthesis.getVoices());
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        setVoiceStatus(`Speaking with ${preferredVoice.name}`);
+      } else {
+        setVoiceStatus('Speaking with default browser voice');
+      }
+
+      utterance.rate = briefingMode === 'short' ? 0.92 : 0.88;
+      utterance.pitch = 0.82;
+      utterance.onend = () => setVoiceStatus(preferredVoice ? `Voice: ${preferredVoice.name}` : 'Native browser voice');
+      utterance.onerror = () => setVoiceStatus('Voice readout stopped or unavailable');
       window.speechSynthesis.speak(utterance);
     };
 
@@ -374,6 +463,25 @@
 
         <div className="flight-attendant-card">
           <p className="flight-attendant-script">{briefing}</p>
+          <p className="flight-attendant-voice-status">{voiceStatus}</p>
+        </div>
+
+        <div className="flight-attendant-controls">
+          <button
+            className={`flight-attendant-toggle ${briefingMode === 'short' ? 'active' : ''}`}
+            onClick={() => handleModeChange('short')}
+          >
+            Short
+          </button>
+          <button
+            className={`flight-attendant-toggle ${briefingMode === 'standard' ? 'active' : ''}`}
+            onClick={() => handleModeChange('standard')}
+          >
+            Standard
+          </button>
+          <button className="flight-attendant-stop" onClick={stopSpeaking}>
+            Stop Speaking
+          </button>
         </div>
 
         <div className="flight-attendant-actions">
