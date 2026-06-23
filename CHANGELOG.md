@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.3.3] - 2026-06-23
+
+### Added
+
+- Added OpenAI premium voice provider service: `backend/src/services/openaiVoiceProvider.js`.
+- Wired Flight Attendant TTS route to OpenAI provider path.
+- Configured server-side premium voice settings through backend `.env`.
+
+### Confirmed
+
+- `OPENAI_API_KEY` is set server-side only and masked in terminal output.
+- `GET /api/flight-attendant/tts/status` returns `configured: true`.
+- Premium voice provider reports `openai`.
+- Premium voice model reports `gpt-4o-mini-tts`.
+- Premium voice name reports `nova`.
+- Premium voice format reports `mp3`.
+- `POST /api/flight-attendant/tts` returns `HTTP/1.1 200 OK` when configured.
+- Response content type is `audio/mpeg`.
+- Test audio file generated successfully as MP3.
+- `flightline-backend` remains online after PM2 restart.
+
+### Guardrails
+
+- API key is not committed to Git.
+- API key is not exposed to React.
+- Native browser speech remains fallback.
+- No microphone input.
+- No deal updates or write actions.
+
 ## [2.3.2] - 2026-06-23
 
 ### Added
