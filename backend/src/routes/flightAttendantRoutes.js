@@ -1,5 +1,6 @@
 const express = require('express');
 const logger = require('../utils/logger');
+const openaiVoiceProvider = require('../services/openaiVoiceProvider');
 
 const router = express.Router();
 
@@ -15,17 +16,33 @@ const ALLOWED_MODES = new Set([
   'standard'
 ]);
 
+const getFallbackResponse = () => ({
+  success: false,
+  configured: false,
+  provider: 'openai',
+  error: 'Premium voice is not configured yet.',
+  fallbackAllowed: true,
+  fallbackMessage: 'Premium voice is unavailable right now. Using device voice.'
+});
+
 router.get('/tts/status', (req, res) => {
+  const status = openaiVoiceProvider.getStatus();
+
   res.status(200).json({
     success: true,
-    configured: false,
-    provider: null,
+    configured: status.configured,
+    provider: status.provider,
+    model: status.model,
+    voice: status.voice,
+    responseFormat: status.responseFormat,
     fallbackAllowed: true,
-    message: 'Premium voice is not configured. Native browser voice fallback should be used.'
+    message: status.configured
+      ? 'OpenAI premium voice is configured.'
+      : 'Premium voice is not configured. Native browser voice fallback should be used.'
   });
 });
 
-router.post('/tts', (req, res) => {
+router.post('/tts', async (req, res) => {
   const { text, briefingType, mode = 'short' } = req.body || {};
   const cleanedText = typeof text === 'string' ? text.trim() : '';
 
@@ -64,20 +81,59 @@ router.post('/tts', (req, res) => {
     });
   }
 
-  logger.info('Flight Attendant premium voice requested but provider is not configured', {
-    briefingType: briefingType || 'unknown',
-    mode,
-    textLength: cleanedText.length
-  });
+  if (!openaiVoiceProvider.getStatus().configured) {
+    logger.info('Flight Attendant OpenAI voice requested but provider is not configured', {
+      briefingType: briefingType || 'unknown',
+      mode,
+      textLength: cleanedText.length
+    });
 
-  return res.status(503).json({
-    success: false,
-    configured: false,
-    provider: null,
-    error: 'Premium voice is not configured yet.',
-    fallbackAllowed: true,
-    fallbackMessage: 'Premium voice is unavailable right now. Using device voice.'
-  });
+    return res.status(503).json(getFallbackResponse());
+  }
+
+  try {
+    const result = await openaiVoiceProvider.generateSpeech({
+      text: cleanedText,
+      mode,
+      briefingType
+    });
+
+    logger.info('Flight Attendant OpenAI voice generated', {
+      briefingType: briefingType || 'unknown',
+      mode,
+      textLength: cleanedText.length,
+      provider: result.provider,
+      model: result.model,
+      voice: result.voice
+    });
+
+    res.setHeader('Content-Type', result.contentType);
+    res.setHeader('X-Flightline-Voice-Provider', result.provider);
+    res.setHeader('X-Flightline-Voice-Model', result.model);
+    res.setHeader('X-Flightline-Voice-Name', result.voice);
+    return res.status(200).send(result.audioBuffer);
+  } catch (error) {
+    logger.error('Flight Attendant OpenAI voice failed', {
+      message: error.message,
+      code: error.code,
+      briefingType: briefingType || 'unknown',
+      mode,
+      textLength: cleanedText.length
+    });
+
+    if (error.code === 'VOICE_PROVIDER_NOT_CONFIGURED') {
+      return res.status(503).json(getFallbackResponse());
+    }
+
+    return res.status(502).json({
+      success: false,
+      configured: true,
+      provider: 'openai',
+      error: 'Premium voice generation failed.',
+      fallbackAllowed: true,
+      fallbackMessage: 'Premium voice is unavailable right now. Using device voice.'
+    });
+  }
 });
 
 module.exports = router;
