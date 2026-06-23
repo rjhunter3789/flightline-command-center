@@ -4,7 +4,7 @@
 
 This document defines the recommended premium voice path for Flight Attendant after v1.1 confirmed that browser speech readout works but is not production quality.
 
-Flight Attendant v1.1 is the stable native-browser baseline. The next major voice improvement should move premium voice generation behind the Flightline backend instead of continuing to tune browser speech.
+Flight Attendant v1.1 is the stable native-browser baseline. Premium voice generation now runs through the Flightline backend.
 
 ## Current Baseline
 
@@ -16,9 +16,10 @@ Flight Attendant v1.1 is the stable native-browser baseline. The next major voic
 | Speak Briefing | Working |
 | Stop Speaking | Working |
 | Voice/status line | Working |
-| Native browser voice | Usable for proof of concept only |
+| Native browser voice | Usable fallback baseline |
 | Backend voice stub | Confirmed working |
-| Premium voice provider | Not implemented |
+| Premium voice provider | OpenAI path configured and verified server-side |
+| Premium audio response | Confirmed `audio/mpeg` MP3 response |
 | Microphone input | Not implemented |
 | Write actions | Not implemented and intentionally excluded |
 
@@ -26,7 +27,7 @@ Flight Attendant v1.1 is the stable native-browser baseline. The next major voic
 
 Do not place premium voice provider credentials in the React frontend.
 
-The correct architecture is:
+The architecture is:
 
 ```text
 Flightline Mobile
@@ -56,7 +57,7 @@ Frontend responsibilities:
 
 ### Backend
 
-Flightline backend should own all premium voice provider interaction.
+Flightline backend owns all premium voice provider interaction.
 
 Backend responsibilities:
 
@@ -70,12 +71,23 @@ Backend responsibilities:
 
 ### Provider Layer
 
-The premium voice provider should be isolated behind a small backend module so Flightline can switch providers later without rewriting the frontend.
+The premium voice provider is isolated behind a backend service module so Flightline can switch providers later without rewriting the frontend.
 
-Recommended provider abstraction:
+Current provider path:
 
 ```text
-voiceProvider.generateSpeech(text, options)
+backend/src/services/openaiVoiceProvider.js
+```
+
+Current defaults:
+
+```text
+Provider: OpenAI
+Model: gpt-4o-mini-tts
+Voice: nova
+Format: mp3
+Speed: 0.95
+Flightline text cap: 1200 characters
 ```
 
 ## Guardrails
@@ -159,8 +171,8 @@ Implemented:
 
 - Added backend route file: `backend/src/routes/flightAttendantRoutes.js`.
 - Registered route under `/api/flight-attendant`.
-- Added `GET /api/flight-attendant/tts/status`.
-- Added `POST /api/flight-attendant/tts`.
+- Added voice status endpoint.
+- Added voice generation endpoint.
 - Added validation for briefing text.
 - Added oversized-text rejection.
 - Added unsupported briefing type rejection.
@@ -179,21 +191,39 @@ Confirmed:
 - Oversized briefing text was rejected.
 - Backend remained online.
 
-### Phase 3 - Provider Integration
+### Phase 3 - OpenAI Provider Integration
 
-Status: next major backend step.
+Status: complete and confirmed working server-side.
 
-- Add selected provider integration.
-- Return playable audio to frontend.
-- Test short and standard briefings.
-- Add usage limits.
+Implemented:
+
+- Added OpenAI voice provider service.
+- Wired Flight Attendant route to provider service.
+- Added server-side provider configuration.
+- Kept native browser speech fallback behavior.
+- Kept provider configuration out of React and Git.
+
+Confirmed:
+
+- Status endpoint returns configured true.
+- Provider reports openai.
+- Model reports gpt-4o-mini-tts.
+- Voice reports nova.
+- Format reports mp3.
+- POST endpoint returns HTTP 200 when configured.
+- Response content type is audio/mpeg.
+- Test file generated as MP3.
+- Backend remained online.
 
 ### Phase 4 - Frontend Premium Playback
 
-- Add Premium Voice option.
-- Play returned audio.
+Status: next build step.
+
+- Add Premium Voice option or make Speak Briefing prefer backend voice when configured.
+- Play returned audio in mobile browser.
 - Keep Stop Speaking behavior.
 - Fall back to browser speech on provider failure.
+- Avoid auto-speak by default.
 
 ### Phase 5 - Pilot Controls
 
@@ -204,8 +234,8 @@ Status: next major backend step.
 
 ## Current Recommendation
 
-Phase 2 is complete. The backend now has a safe voice stub that prepares the premium voice architecture without exposing credentials or committing to a provider.
+Phase 3 is complete server-side. Flightline can now generate OpenAI premium voice audio from the backend.
 
-The next major build step should be provider selection and provider integration planning.
+The next build step should be Phase 4: frontend premium playback.
 
 Do not add microphone input or write actions yet.
