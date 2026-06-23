@@ -96,28 +96,39 @@ Expected mobile MVP behavior:
 
 ## Flight Attendant Verification
 
-Flight Attendant v1 is frontend-only and read-only.
+Flight Attendant v1.1 is frontend-only and read-only.
 
 Test steps:
 
 1. Open Flightline Mobile.
-2. Tap Active Deal Summary.
-3. Confirm written briefing updates.
-4. Tap Speak Briefing.
-5. Confirm browser speech reads the briefing.
-6. Repeat with Deal Flow Summary, Today's Snapshot, and What Needs Attention.
+2. Confirm Flight Attendant appears near the top.
+3. Tap Short.
+4. Tap Active Deal Summary.
+5. Confirm written briefing updates with a shorter summary.
+6. Tap Speak Briefing.
+7. Confirm browser speech reads the briefing.
+8. Tap Stop Speaking while it is talking.
+9. Confirm speech stops.
+10. Tap Standard.
+11. Tap Speak Briefing again.
+12. Confirm the voice/status line shows the selected browser voice/status.
+13. Repeat with Deal Flow Summary, Today's Snapshot, and What Needs Attention.
 
 Expected result:
 
+- Short mode works.
+- Standard mode works.
 - Briefing text updates.
 - Browser speech readout works.
+- Stop Speaking works.
+- Voice/status line works.
 - No backend restart is required.
 
 Known limitation:
 
-- Native browser voice quality is poor and not acceptable for production.
+- Native browser voice quality is improved slightly but still not acceptable for production.
 
-Next voice pass should improve voice selection, add a stop speaking control, shorten scripts, and prepare premium TTS.
+Next voice pass should prepare premium TTS and define privacy/cost rules before adding any API-backed audio generation.
 
 ## Save PM2 State
 
