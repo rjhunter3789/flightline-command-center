@@ -1,6 +1,6 @@
 # Flightline Server Architecture
 
-Last Updated: June 21, 2026
+Last Updated: June 22, 2026
 
 ## Server
 
@@ -44,6 +44,32 @@ PM2 ecosystem config:
 Backend port:
 
 `3001`
+
+## Frontend and Mobile MVP
+
+Frontend source path:
+
+`/var/www/flightline/frontend`
+
+Active build path served by Nginx:
+
+`/var/www/flightline/frontend/build`
+
+Important frontend/mobile files:
+
+- `frontend/src/App.jsx`
+- `frontend/src/App.css`
+- `frontend/src/components/Mobile/FlightlineMobile.jsx`
+- `frontend/src/components/Mobile/FlightlineMobile.css`
+- `frontend/src/hooks/useRealTimeData.js`
+
+Mobile MVP notes:
+
+- Flightline Mobile is the active mobile MVP path for iPhone.
+- Mobile uses the same desktop 12-deal demo source through `useRealTimeData()`.
+- Mobile WebSocket behavior is disabled for demo mode until authenticated pilot access is ready.
+- Frontend changes require `npm run build` from `/var/www/flightline/frontend`.
+- The built frontend is local server state; source changes are tracked through Git.
 
 ## PM2 Processes
 
@@ -130,3 +156,5 @@ Completed cleanup:
 ## Current Recommendation
 
 Leave Smart Doc stopped. Keep Auto Audit Pro and Flightline online. Do not restart retired services unless there is a specific business need.
+
+For Flightline Mobile, keep the MVP stable before re-enabling live WebSocket behavior or adding authenticated pilot access.
