@@ -1,8 +1,8 @@
-# Flightline Session Handoff - June 21-22, 2026
+# Flightline Session Handoff - June 21-23, 2026
 
 ## Purpose
 
-This handoff preserves the key decisions, commands, recovery work, documentation updates, and mobile MVP updates from the Flightline stabilization work.
+This handoff preserves the key decisions, commands, recovery work, documentation updates, mobile MVP updates, and Flight Attendant Voice Briefing milestone from the Flightline stabilization work.
 
 ## Final Confirmed State
 
@@ -15,6 +15,8 @@ This handoff preserves the key decisions, commands, recovery work, documentation
 | Auto Audit Pro | Online in PM2 as `auto-audit` |
 | Flightline | Online in PM2 as `flightline-backend` |
 | Flightline Mobile | Working mobile MVP on iPhone |
+| Flight Attendant | Voice Briefing v1 confirmed working as read-only proof of concept |
+| Flight Attendant voice quality | Native browser voice not acceptable for production |
 | Smart Doc | Stopped in PM2 as `smart-doc-v2` |
 | MongoDB | Active and running |
 | Swap | 2GB active and persistent at `/swapfile` |
@@ -72,6 +74,40 @@ Expected mobile behavior now:
 - Customer/deal tap opens a detail card in place.
 - Today's Snapshot shows deal count, demo close estimate, gross opportunity, and appointment/test-drive count.
 
+### Flight Attendant Voice Briefing v1
+
+Flight Attendant Voice Briefing v1 was added after the mobile MVP path was stable.
+
+Confirmed working:
+
+- Flight Attendant panel appears in Flightline Mobile.
+- Active Deal Summary generates a written status-board briefing.
+- Deal Flow Summary generates a written pipeline briefing.
+- Today's Snapshot generates a written summary.
+- What Needs Attention generates a priority summary.
+- Speak Briefing reads the current summary out loud using browser speech synthesis.
+
+Important finding:
+
+- Browser speech readout works, but native browser voice quality is not acceptable for production.
+
+Current guardrails:
+
+- Read-only only.
+- No microphone input yet.
+- No deal changes.
+- No messaging.
+- No CRM writeback.
+- No external tool access.
+
+Next voice direction:
+
+- Improve native voice selection where possible.
+- Shorten spoken scripts.
+- Add stop speaking control.
+- Prepare premium TTS such as ElevenLabs or a Nova-quality voice service.
+- Add microphone input only after read-only briefing remains stable.
+
 ### Documentation Updates
 
 Created or updated the following files:
@@ -82,6 +118,7 @@ Created or updated the following files:
 - `docs/FLIGHTLINE-TROUBLESHOOTING.md`
 - `docs/FLIGHTLINE-RECOVERY-2026-06-21.md`
 - `docs/FLIGHTLINE-MOBILE-MVP-2026-06-22.md`
+- `docs/FLIGHTLINE-FLIGHT-ATTENDANT-VOICE-BRIEFING-2026-06-23.md`
 - `docs/FLIGHTLINE-GIT-AND-DEPLOYMENT.md`
 - `docs/FLIGHTLINE-SMART-DOC-RETIREMENT-NOTE.md`
 - `CHANGELOG.md`
@@ -119,20 +156,20 @@ Final Git state:
 6. Avoid pasting large heredoc blocks into SSH; GitHub direct updates were safer.
 7. Mobile should use the same demo data source as desktop, not a separate watered-down fallback.
 8. Mobile MVP behavior should be a phone layout of Flightline, not a separate mini-app.
+9. Flight Attendant should stay read-only until authentication, safety rules, and pilot use are defined.
+10. Native browser speech proves the workflow but is not production-quality voice.
 
 ## Recommended Next Session
 
-The next clean follow-up is to polish Flightline Mobile visually and create a broader AAP server architecture document that maps:
+The next clean follow-up is to improve Flight Attendant voice quality and polish Flightline Mobile visually.
 
-- Auto Audit Pro
-- Flightline
-- Nova source
-- Smart Doc retired folders
-- MongoDB
-- PM2 processes
-- Nginx routing
-- GitHub repositories
-- Resize/snapshot plan
+Flight Attendant next-pass items:
+
+- Improve native browser voice selection.
+- Add stop speaking button.
+- Add shorter manager briefing mode.
+- Prepare premium TTS integration.
+- Create microphone input plan.
 
 Mobile next-pass items:
 
@@ -141,6 +178,8 @@ Mobile next-pass items:
 - Add mobile priority alert section.
 - Clean up older frontend build warnings.
 - Create authenticated pilot access before re-enabling mobile WebSocket behavior.
+
+The broader AAP server architecture document is also still a useful future task.
 
 ## Commands Worth Keeping
 
