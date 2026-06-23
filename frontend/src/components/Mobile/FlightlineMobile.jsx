@@ -16,7 +16,6 @@
     "F&I Office"
   ];
 
-
   const normalizeStage = (stage) => {
     const value = String(stage || '').toLowerCase().replace(/&/g, '').replace(/\s+/g, '_');
     if (value === 'test_drive') return 'Test Drive';
@@ -201,6 +200,11 @@
           </span>
         </header>
 
+        <FlightAttendantSection
+          deals={deals}
+          countsByStage={countsByStage}
+        />
+
         {/* Primary CTAs */}
         <section className="cta-section">
           <h2 className="section-title">Quick actions</h2>
@@ -253,6 +257,152 @@
           <ChatSentimentSection />
         )}
       </div>
+    );
+  };
+
+  const getDealGrossValue = (deal) => Number(deal.grossProfit || deal.salePrice || 0);
+
+  const getCustomerName = (deal) => deal.customer?.name || deal.customerName || 'Unknown customer';
+
+  const getVehicleLabel = (deal) => {
+    const year = deal.vehicle?.year || deal.vehicleYear || '';
+    const make = deal.vehicle?.make || deal.vehicleMake || '';
+    const model = deal.vehicle?.model || deal.vehicleModel || '';
+    return `${year} ${make} ${model}`.trim() || 'vehicle';
+  };
+
+  const getDealTimeLabel = (deal) => deal.timeInStage || `${calculateDealAge(deal.createdAt)} hours`;
+
+  const getHighestGrossDeal = (deals) => {
+    return [...deals].sort((a, b) => getDealGrossValue(b) - getDealGrossValue(a))[0];
+  };
+
+  const getAttentionDeals = (deals) => {
+    return deals
+      .filter((deal) => {
+        const stage = normalizeStage(deal.status || deal.stage);
+        const urgency = String(deal.urgency || '').toLowerCase();
+        return urgency === 'high' || stage === 'Negotiation' || stage === 'Test Drive';
+      })
+      .slice(0, 3);
+  };
+
+  const buildFlightAttendantBriefing = (type, deals, countsByStage) => {
+    const totalDeals = deals.length;
+    const showroom = countsByStage.Showroom || 0;
+    const testDrive = countsByStage['Test Drive'] || 0;
+    const negotiation = countsByStage.Negotiation || 0;
+    const finance = countsByStage['F&I Office'] || 0;
+    const highUrgency = deals.filter((deal) => String(deal.urgency || '').toLowerCase() === 'high').length;
+    const highProbability = deals.filter((deal) => (deal.probability || 0) >= 90).length;
+    const revenue = deals.reduce((sum, deal) => sum + getDealGrossValue(deal), 0);
+    const appointments = deals.filter((deal) => normalizeStage(deal.status || deal.stage) === 'Test Drive' || deal.appointmentTime).length;
+    const highestGrossDeal = getHighestGrossDeal(deals);
+    const attentionDeals = getAttentionDeals(deals);
+
+    if (!totalDeals) {
+      return 'Flight Attendant briefing: there are currently no active deals on the board.';
+    }
+
+    if (type === 'activeDeals') {
+      const topLine = `Flight Attendant active deal summary: you currently have ${totalDeals} active deals. Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}.`;
+      const urgencyLine = highUrgency ? `There are ${highUrgency} high urgency deals on the board.` : 'There are no high urgency deals flagged right now.';
+      const topDealLine = highestGrossDeal
+        ? `The highest gross opportunity is ${getCustomerName(highestGrossDeal)} on the ${getVehicleLabel(highestGrossDeal)}, currently in ${normalizeStage(highestGrossDeal.status || highestGrossDeal.stage)}.`
+        : '';
+      return `${topLine} ${urgencyLine} ${topDealLine}`.trim();
+    }
+
+    if (type === 'dealFlow') {
+      const busiestStage = Object.entries(countsByStage).sort((a, b) => b[1] - a[1])[0];
+      return `Flight Attendant deal flow summary: Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}. The busiest stage right now is ${busiestStage?.[0] || 'unknown'} with ${busiestStage?.[1] || 0} deals.`;
+    }
+
+    if (type === 'snapshot') {
+      return `Flight Attendant today's snapshot: you have ${totalDeals} active deals, ${highProbability} high probability deals, ${appointments} appointment or test drive opportunities, and approximately $${revenue.toLocaleString()} in gross opportunity on the board.`;
+    }
+
+    if (type === 'attention') {
+      if (!attentionDeals.length) {
+        return `Flight Attendant attention summary: the board looks stable. You have ${totalDeals} active deals and no obvious high urgency items flagged.`;
+      }
+
+      const firstDeal = attentionDeals[0];
+      const firstLine = `Flight Attendant attention summary: I would start with ${getCustomerName(firstDeal)} on the ${getVehicleLabel(firstDeal)}, currently in ${normalizeStage(firstDeal.status || firstDeal.stage)} for ${getDealTimeLabel(firstDeal)}.`;
+      const followUpLine = attentionDeals.length > 1
+        ? `There are ${attentionDeals.length} deals worth a manager look right now.`
+        : 'That is the main deal worth a manager look right now.';
+      return `${firstLine} ${followUpLine}`;
+    }
+
+    return 'Flight Attendant is ready. Ask for Active Deals, Deal Flow, Today’s Snapshot, or what needs attention.';
+  };
+
+  const FlightAttendantSection = ({ deals, countsByStage }) => {
+    const [briefing, setBriefing] = useState('Flight Attendant is ready. Choose a briefing below.');
+    const [activeBriefing, setActiveBriefing] = useState(null);
+
+    const handleBriefing = (type) => {
+      setActiveBriefing(type);
+      setBriefing(buildFlightAttendantBriefing(type, deals, countsByStage));
+    };
+
+    const speakBriefing = () => {
+      if (!('speechSynthesis' in window)) {
+        setBriefing(`${briefing} Voice readout is not supported in this browser.`);
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(briefing);
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    };
+
+    return (
+      <section className="flight-attendant-section">
+        <div className="section-header">
+          <div>
+            <h2 className="section-title">Flight Attendant</h2>
+            <p className="section-hint">Read-only voice briefing for the status board</p>
+          </div>
+          <button className="flight-attendant-speak" onClick={speakBriefing}>
+            Speak Briefing
+          </button>
+        </div>
+
+        <div className="flight-attendant-card">
+          <p className="flight-attendant-script">{briefing}</p>
+        </div>
+
+        <div className="flight-attendant-actions">
+          <button
+            className={`flight-attendant-button ${activeBriefing === 'activeDeals' ? 'active' : ''}`}
+            onClick={() => handleBriefing('activeDeals')}
+          >
+            Active Deal Summary
+          </button>
+          <button
+            className={`flight-attendant-button ${activeBriefing === 'dealFlow' ? 'active' : ''}`}
+            onClick={() => handleBriefing('dealFlow')}
+          >
+            Deal Flow Summary
+          </button>
+          <button
+            className={`flight-attendant-button ${activeBriefing === 'snapshot' ? 'active' : ''}`}
+            onClick={() => handleBriefing('snapshot')}
+          >
+            Today's Snapshot
+          </button>
+          <button
+            className={`flight-attendant-button ${activeBriefing === 'attention' ? 'active' : ''}`}
+            onClick={() => handleBriefing('attention')}
+          >
+            What Needs Attention?
+          </button>
+        </div>
+      </section>
     );
   };
 
