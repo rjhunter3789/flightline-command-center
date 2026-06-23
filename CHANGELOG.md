@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.3.2] - 2026-06-23
+
+### Added
+
+- Added Flight Attendant backend voice stub route: `backend/src/routes/flightAttendantRoutes.js`.
+- Registered backend route at `/api/flight-attendant`.
+- Added status endpoint for premium voice availability.
+- Added POST endpoint for future premium voice requests.
+
+### Confirmed
+
+- `node --check backend/src/routes/flightAttendantRoutes.js` passed.
+- `node --check backend/src/server.js` passed.
+- `flightline-backend` restarted successfully in PM2.
+- `GET /api/flight-attendant/tts/status` returns configured false with fallback allowed.
+- `POST /api/flight-attendant/tts` returns premium voice not configured with fallback allowed.
+- Unsupported briefing type is rejected.
+- Oversized briefing text is rejected.
+- Backend remains online.
+
+### Guardrails
+
+- No premium voice provider is integrated yet.
+- No provider credentials are required.
+- No provider credentials are exposed to React.
+- No deal updates or write actions are possible from this route.
+- Native browser speech remains the fallback path.
+
 ## [2.3.1] - 2026-06-23
 
 ### Confirmed
