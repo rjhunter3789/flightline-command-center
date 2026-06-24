@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.3.5] - 2026-06-23
+
+### Added
+
+- Added FlightLine CarPlay entitlement request documentation: `docs/FLIGHTLINE-CARPLAY-ENTITLEMENT-REQUEST-2026-06-23.md`.
+- Documented Apple Developer submission for CarPlay Voice-Based Conversational app type.
+- Documented FlightLine CarPlay positioning as Flight Attendant read-only voice briefings.
+
+### Submitted
+
+- FlightLine App ID created/requested under bundle ID `io.autoauditpro.flightline`.
+- CarPlay app type selected: Voice-Based Conversational.
+- Apple submission confirmation received: request will be reviewed and Apple will provide a status update.
+
+### Guardrails
+
+- CarPlay scope is not a full dashboard.
+- CarPlay scope is read-only Flight Attendant voice briefings only.
+- No customer/deal card browsing in CarPlay.
+- No deal updates.
+- No CRM/DMS writeback.
+- No outbound messages.
+- No workflow triggers.
+
 ## [2.3.4] - 2026-06-23
 
 ### Added
