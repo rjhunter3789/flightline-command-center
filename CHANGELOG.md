@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.3.4] - 2026-06-23
+
+### Added
+
+- Added frontend premium voice playback for Flight Attendant on FlightLine Mobile.
+- Added `frontend/src/utils/flightAttendantAudio.js` to request backend-generated premium audio and play it in the browser.
+- Added mobile wiring so `Speak Briefing` tries premium backend voice first and falls back to device/browser speech when needed.
+- Added premium voice latency polish so the button shows `Generating...` while audio is being prepared.
+
+### Confirmed
+
+- Premium voice playback works smoothly on iPhone.
+- OpenAI/Nova voice quality is significantly better than native browser speech.
+- Short briefing playback works.
+- Standard briefing playback works.
+- `Stop Speaking` stops premium audio playback.
+- Fallback to native browser speech remains available.
+- Frontend production build passes with only existing non-blocking dashboard warnings.
+
+### Changed
+
+- Changed customer-facing product label from `Flightline` to `FlightLine` in the mobile header and demo badge.
+- Changed standard briefing text from `Flight Attendant ... summary` to `FlightLine ... summary`.
+- Clarified naming hierarchy: `FlightLine` is the platform/command board; `Flight Attendant` is the voice/persona.
+
+### Guardrails
+
+- No microphone input.
+- No deal updates.
+- No CRM/DMS write actions.
+- No provider configuration exposed to React.
+- Native browser speech remains a fallback path.
+
 ## [2.3.3] - 2026-06-23
 
 ### Added
