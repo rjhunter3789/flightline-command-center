@@ -308,6 +308,36 @@
       || voices[0];
   };
 
+  const chooseFlightAttendantAudioMimeType = () => {
+    if (typeof MediaRecorder === 'undefined') return '';
+
+    const preferredTypes = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus'
+    ];
+
+    return preferredTypes.find((type) => MediaRecorder.isTypeSupported(type)) || '';
+  };
+
+  const transcribeFlightAttendantAudioTurn = async (audioBlob) => {
+    const response = await fetch('/api/flight-attendant/conversation/transcribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': audioBlob.type || 'application/octet-stream'
+      },
+      body: audioBlob
+    });
+
+    if (!response.ok) {
+      throw new Error('Flight Attendant transcription request failed.');
+    }
+
+    const result = await response.json();
+    return typeof result.transcript === 'string' ? result.transcript.trim() : '';
+  };
+
   const getSpeechRecognitionApi = () => {
     if (typeof window === 'undefined') return null;
     return window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -465,7 +495,9 @@
     const [isGeneratingPremiumVoice, setIsGeneratingPremiumVoice] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [conversationActive, setConversationActive] = useState(false);
-    const recognitionRef = useRef(null);
+    const mediaStreamRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+    const recordingTimerRef = useRef(null);
     const conversationActiveRef = useRef(false);
     const restartListeningTimerRef = useRef(null);
     const lastSpokenBriefingRef = useRef('Flight Attendant is ready. Tap Talk to start a FlightLine conversation.');
@@ -477,9 +509,17 @@
           clearTimeout(restartListeningTimerRef.current);
           restartListeningTimerRef.current = null;
         }
-        if (recognitionRef.current) {
-          recognitionRef.current.abort();
-          recognitionRef.current = null;
+        if (recordingTimerRef.current) {
+          clearTimeout(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+        mediaRecorderRef.current = null;
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
         }
         stopPremiumFlightAttendantAudio();
         if ('speechSynthesis' in window) {
@@ -523,15 +563,14 @@
       }
     };
 
-    const stopVoiceRecognition = () => {
-      if (restartListeningTimerRef.current) {
-        clearTimeout(restartListeningTimerRef.current);
-        restartListeningTimerRef.current = null;
+    const stopMediaTurn = () => {
+      if (recordingTimerRef.current) {
+        clearTimeout(recordingTimerRef.current);
+        recordingTimerRef.current = null;
       }
 
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-        recognitionRef.current = null;
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
 
       setIsListening(false);
@@ -540,7 +579,14 @@
     const stopConversationSession = () => {
       conversationActiveRef.current = false;
       setConversationActive(false);
-      stopVoiceRecognition();
+      stopMediaTurn();
+      mediaRecorderRef.current = null;
+
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+
       stopPremiumFlightAttendantAudio();
       setIsGeneratingPremiumVoice(false);
 
@@ -563,12 +609,12 @@
         clearTimeout(restartListeningTimerRef.current);
       }
 
-      setVoiceInputStatus('Response complete. Returning to listening...');
+      setVoiceInputStatus('Response complete. Opening microphone for the next FlightLine question...');
 
       restartListeningTimerRef.current = setTimeout(() => {
         restartListeningTimerRef.current = null;
         startListeningForCommand();
-      }, 1200);
+      }, 900);
     };
 
     const speakWithNativeBrowserVoice = (textToSpeak = briefing, onFinished = null) => {
@@ -698,109 +744,125 @@
     function startListeningForCommand() {
       if (!conversationActiveRef.current || isListening || isGeneratingPremiumVoice) return;
 
-      const SpeechRecognition = getSpeechRecognitionApi();
-      if (!SpeechRecognition) {
+      const stream = mediaStreamRef.current;
+      if (!stream || !stream.active) {
+        setVoiceInputStatus('Microphone session ended. Tap Talk to restart.');
         conversationActiveRef.current = false;
         setConversationActive(false);
-        setVoiceInputStatus('Voice input is not supported in this browser. Use the briefing buttons or Speak Briefing.');
         return;
       }
 
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-        recognitionRef.current = null;
+      if (typeof MediaRecorder === 'undefined') {
+        setVoiceInputStatus('Voice session recording is not supported in this browser.');
+        conversationActiveRef.current = false;
+        setConversationActive(false);
+        return;
       }
 
-      stopPremiumFlightAttendantAudio();
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
+      const mimeType = chooseFlightAttendantAudioMimeType();
+      const recorderOptions = mimeType ? { mimeType } : undefined;
+      const audioChunks = [];
+
+      let recorder;
+      try {
+        recorder = new MediaRecorder(stream, recorderOptions);
+      } catch (error) {
+        console.error('Flight Attendant MediaRecorder failed:', error);
+        setVoiceInputStatus('Could not open microphone recorder. Tap Talk to restart.');
+        conversationActiveRef.current = false;
+        setConversationActive(false);
+        return;
       }
 
-      setVoiceInputStatus('Preparing microphone...');
-
-      const recognition = new SpeechRecognition();
-      let handledResult = false;
-      recognition.lang = 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognitionRef.current = recognition;
+      mediaRecorderRef.current = recorder;
       setIsListening(true);
       setRecognizedCommand('');
-      setVoiceInputStatus('Preparing microphone...');
+      setVoiceInputStatus('Listening now. Ask a FlightLine question.');
 
-      recognition.onstart = () => {
-        if (!conversationActiveRef.current) return;
-        setVoiceInputStatus('Listening now. Ask a FlightLine question.');
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
       };
 
-      recognition.onspeechstart = () => {
-        if (!conversationActiveRef.current) return;
-        setVoiceInputStatus('Heard speech. Keep going...');
-      };
-
-      recognition.onspeechend = () => {
-        if (!conversationActiveRef.current) return;
-        setVoiceInputStatus('Processing FlightLine request...');
-      };
-
-      recognition.onresult = (event) => {
-        handledResult = true;
-        const transcript = Array.from(event.results || [])
-          .map((result) => result[0]?.transcript || '')
-          .join(' ')
-          .trim();
-
-        setRecognizedCommand(transcript);
+      recorder.onerror = () => {
         setIsListening(false);
-        recognitionRef.current = null;
-        runVoiceCommand(transcript);
+        setVoiceInputStatus('Microphone recorder stopped. Tap Talk to restart.');
+        conversationActiveRef.current = false;
+        setConversationActive(false);
       };
 
-      recognition.onerror = (event) => {
+      recorder.onstop = async () => {
         setIsListening(false);
-        recognitionRef.current = null;
+        mediaRecorderRef.current = null;
+
         if (!conversationActiveRef.current) return;
 
-        const errorName = event?.error || 'unknown';
-        if (errorName === 'no-speech') {
-          setVoiceInputStatus('I did not catch that. Still listening for a FlightLine question.');
+        if (!audioChunks.length) {
+          setVoiceInputStatus('I did not catch that. Listening again...');
           scheduleNextListening();
           return;
         }
 
-        setVoiceInputStatus(`Voice input stopped: ${errorName}. Tap Talk to restart.`);
-        conversationActiveRef.current = false;
-        setConversationActive(false);
-      };
+        try {
+          setVoiceInputStatus('Processing FlightLine request...');
+          const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+          const transcript = await transcribeFlightAttendantAudioTurn(audioBlob);
 
-      recognition.onend = () => {
-        setIsListening(false);
-        recognitionRef.current = null;
-        if (conversationActiveRef.current && !handledResult) {
-          setVoiceInputStatus('Listening paused. Reopening microphone...');
+          if (!conversationActiveRef.current) return;
+
+          if (!transcript) {
+            setVoiceInputStatus('I did not catch that. Listening again...');
+            scheduleNextListening();
+            return;
+          }
+
+          setRecognizedCommand(transcript);
+          setVoiceInputStatus(`Heard: ${transcript}`);
+          await runVoiceCommand(transcript);
+        } catch (error) {
+          console.error('Flight Attendant turn transcription failed:', error);
+          if (!conversationActiveRef.current) return;
+          setVoiceInputStatus('I could not process that voice turn. Listening again...');
           scheduleNextListening();
         }
       };
 
-      recognition.start();
+      recorder.start();
+      recordingTimerRef.current = setTimeout(() => {
+        recordingTimerRef.current = null;
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+        }
+      }, 5500);
     }
 
-    const startConversationSession = () => {
+    const startConversationSession = async () => {
       if (conversationActiveRef.current || isGeneratingPremiumVoice) return;
 
-      const SpeechRecognition = getSpeechRecognitionApi();
-      if (!SpeechRecognition) {
-        setVoiceInputStatus('Voice input is not supported in this browser. Use the briefing buttons or Speak Briefing.');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setVoiceInputStatus('Microphone access is not supported in this browser.');
         return;
       }
 
-      primeFlightAttendantAudio({ onStatus: setVoiceStatus });
-      conversationActiveRef.current = true;
-      setConversationActive(true);
-      setVoiceInputStatus('Conversation active. Ask about FlightLine deal activity only.');
-      startListeningForCommand();
+      if (typeof MediaRecorder === 'undefined') {
+        setVoiceInputStatus('Voice session recording is not supported in this browser.');
+        return;
+      }
+
+      try {
+        setVoiceInputStatus('Requesting microphone access...');
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
+        primeFlightAttendantAudio({ onStatus: setVoiceStatus });
+        conversationActiveRef.current = true;
+        setConversationActive(true);
+        setVoiceInputStatus('Conversation active. Ask about FlightLine deal activity only.');
+        startListeningForCommand();
+      } catch (error) {
+        console.error('Flight Attendant microphone access failed:', error);
+        setVoiceInputStatus('Microphone access was not allowed. Tap Talk and allow microphone access.');
+      }
     };
 
     return (

@@ -1,10 +1,20 @@
 const express = require('express');
 const logger = require('../utils/logger');
 const openaiVoiceProvider = require('../services/openaiVoiceProvider');
+const openaiTranscriptionProvider = require('../services/openaiTranscriptionProvider');
 
 const router = express.Router();
 
 const MAX_TTS_TEXT_LENGTH = 1200;
+const MAX_TRANSCRIPTION_BYTES = 8 * 1024 * 1024;
+const ALLOWED_AUDIO_TYPES = [
+  'audio/webm',
+  'audio/mp4',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'application/octet-stream'
+];
 const ALLOWED_BRIEFING_TYPES = new Set([
   'activeDeals',
   'dealFlow',
@@ -41,6 +51,94 @@ router.get('/tts/status', (req, res) => {
       : 'Premium voice is not configured. Native browser voice fallback should be used.'
   });
 });
+
+router.get('/conversation/status', (req, res) => {
+  const status = openaiTranscriptionProvider.getStatus();
+
+  res.status(200).json({
+    success: true,
+    configured: status.configured,
+    provider: status.provider,
+    model: status.model,
+    maxBytes: status.maxBytes,
+    message: status.configured
+      ? 'OpenAI transcription is configured for Flight Attendant voice sessions.'
+      : 'OpenAI transcription is not configured.'
+  });
+});
+
+router.post(
+  '/conversation/transcribe',
+  express.raw({
+    type: ALLOWED_AUDIO_TYPES,
+    limit: MAX_TRANSCRIPTION_BYTES
+  }),
+  async (req, res) => {
+    const audioBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+    const mimeType = req.headers['content-type'] || 'application/octet-stream';
+
+    if (!audioBuffer.length) {
+      return res.status(400).json({
+        success: false,
+        error: 'Audio body is required.'
+      });
+    }
+
+    if (audioBuffer.length > MAX_TRANSCRIPTION_BYTES) {
+      return res.status(413).json({
+        success: false,
+        error: 'Audio body exceeds maximum allowed size.',
+        maxBytes: MAX_TRANSCRIPTION_BYTES
+      });
+    }
+
+    if (!openaiTranscriptionProvider.getStatus().configured) {
+      return res.status(503).json({
+        success: false,
+        configured: false,
+        provider: 'openai',
+        error: 'Transcription is not configured.'
+      });
+    }
+
+    try {
+      const result = await openaiTranscriptionProvider.transcribeAudio({
+        audioBuffer,
+        mimeType
+      });
+
+      logger.info('Flight Attendant voice turn transcribed', {
+        textLength: result.text.length,
+        bytes: result.bytes,
+        mimeType: result.mimeType,
+        provider: result.provider,
+        model: result.model
+      });
+
+      return res.status(200).json({
+        success: true,
+        transcript: result.text,
+        provider: result.provider,
+        model: result.model
+      });
+    } catch (error) {
+      logger.error('Flight Attendant voice turn transcription failed', {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        bytes: audioBuffer.length,
+        mimeType
+      });
+
+      return res.status(502).json({
+        success: false,
+        configured: true,
+        provider: 'openai',
+        error: 'Voice turn transcription failed.'
+      });
+    }
+  }
+);
 
 router.post('/tts', async (req, res) => {
   const { text, briefingType, mode = 'short' } = req.body || {};
