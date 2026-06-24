@@ -1,5 +1,5 @@
   /**
-   * Flightline™ - Mobile Command Center
+   * FlightLine™ - Mobile Command Center
    * Copyright (c) 2025 JL Robinson. All Rights Reserved.
    *
    * This file is proprietary and confidential.
@@ -67,7 +67,7 @@
   ];
 
   const demoDealership = {
-    name: "Flightline Demo"
+    name: "FlightLine Demo"
   };
 
   const primaryCtas = [
@@ -193,11 +193,11 @@
         {/* Header */}
         <header className="mobile-header">
           <div className="header-content">
-            <h1 className="mobile-title">Flightline</h1>
+            <h1 className="mobile-title">FlightLine</h1>
             <p className="mobile-subtitle">Mobile command for deal flow</p>
           </div>
           <span className="dealer-badge">
-            {dealership?.name || 'Flightline Demo'}
+            {dealership?.name || 'FlightLine Demo'}
           </span>
         </header>
 
