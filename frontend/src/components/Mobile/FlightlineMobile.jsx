@@ -331,7 +331,7 @@
         return `Active deals: ${totalDeals} total. Showroom ${showroom}, Test Drive ${testDrive}, Negotiation ${negotiation}, F&I ${finance}. ${highUrgency ? `${highUrgency} high urgency.` : 'No high urgency flags.'}`;
       }
 
-      const topLine = `Flight Attendant active deal summary: you currently have ${totalDeals} active deals. Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}.`;
+      const topLine = `FlightLine active deal summary: you currently have ${totalDeals} active deals. Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}.`;
       const urgencyLine = highUrgency ? `There are ${highUrgency} high urgency deals on the board.` : 'There are no high urgency deals flagged right now.';
       const topDealLine = highestGrossDeal
         ? `The highest gross opportunity is ${getCustomerName(highestGrossDeal)} on the ${getVehicleLabel(highestGrossDeal)}, currently in ${normalizeStage(highestGrossDeal.status || highestGrossDeal.stage)}.`
@@ -346,7 +346,7 @@
         return `Deal flow: Showroom ${showroom}, Test Drive ${testDrive}, Negotiation ${negotiation}, F&I ${finance}. Busiest stage: ${busiestStage?.[0] || 'unknown'}.`;
       }
 
-      return `Flight Attendant deal flow summary: Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}. The busiest stage right now is ${busiestStage?.[0] || 'unknown'} with ${busiestStage?.[1] || 0} deals.`;
+      return `FlightLine deal flow summary: Showroom has ${showroom}, Test Drive has ${testDrive}, Negotiation has ${negotiation}, and F&I has ${finance}. The busiest stage right now is ${busiestStage?.[0] || 'unknown'} with ${busiestStage?.[1] || 0} deals.`;
     }
 
     if (type === 'snapshot') {
@@ -354,14 +354,14 @@
         return `Snapshot: ${totalDeals} active deals, ${highProbability} high probability, ${appointments} appointment or test drive opportunities, $${revenue.toLocaleString()} gross opportunity.`;
       }
 
-      return `Flight Attendant today's snapshot: you have ${totalDeals} active deals, ${highProbability} high probability deals, ${appointments} appointment or test drive opportunities, and approximately $${revenue.toLocaleString()} in gross opportunity on the board.`;
+      return `FlightLine today's snapshot: you have ${totalDeals} active deals, ${highProbability} high probability deals, ${appointments} appointment or test drive opportunities, and approximately $${revenue.toLocaleString()} in gross opportunity on the board.`;
     }
 
     if (type === 'attention') {
       if (!attentionDeals.length) {
         return isShort
           ? `Attention: board looks stable. ${totalDeals} active deals, no obvious high urgency items.`
-          : `Flight Attendant attention summary: the board looks stable. You have ${totalDeals} active deals and no obvious high urgency items flagged.`;
+          : `FlightLine attention summary: the board looks stable. You have ${totalDeals} active deals and no obvious high urgency items flagged.`;
       }
 
       const firstDeal = attentionDeals[0];
@@ -370,7 +370,7 @@
         return `Attention: start with ${getCustomerName(firstDeal)}, ${normalizeStage(firstDeal.status || firstDeal.stage)}, ${getDealTimeLabel(firstDeal)} in stage.`;
       }
 
-      const firstLine = `Flight Attendant attention summary: I would start with ${getCustomerName(firstDeal)} on the ${getVehicleLabel(firstDeal)}, currently in ${normalizeStage(firstDeal.status || firstDeal.stage)} for ${getDealTimeLabel(firstDeal)}.`;
+      const firstLine = `FlightLine attention summary: I would start with ${getCustomerName(firstDeal)} on the ${getVehicleLabel(firstDeal)}, currently in ${normalizeStage(firstDeal.status || firstDeal.stage)} for ${getDealTimeLabel(firstDeal)}.`;
       const followUpLine = attentionDeals.length > 1
         ? `There are ${attentionDeals.length} deals worth a manager look right now.`
         : 'That is the main deal worth a manager look right now.';
