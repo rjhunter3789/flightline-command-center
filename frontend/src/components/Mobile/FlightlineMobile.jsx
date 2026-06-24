@@ -563,10 +563,12 @@
         clearTimeout(restartListeningTimerRef.current);
       }
 
+      setVoiceInputStatus('Response complete. Returning to listening...');
+
       restartListeningTimerRef.current = setTimeout(() => {
         restartListeningTimerRef.current = null;
         startListeningForCommand();
-      }, 400);
+      }, 1200);
     };
 
     const speakWithNativeBrowserVoice = (textToSpeak = briefing, onFinished = null) => {
@@ -704,10 +706,17 @@
         return;
       }
 
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+        recognitionRef.current = null;
+      }
+
       stopPremiumFlightAttendantAudio();
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+
+      setVoiceInputStatus('Preparing microphone...');
 
       const recognition = new SpeechRecognition();
       let handledResult = false;
@@ -719,7 +728,22 @@
       recognitionRef.current = recognition;
       setIsListening(true);
       setRecognizedCommand('');
-      setVoiceInputStatus('Conversation active. Listening for FlightLine questions...');
+      setVoiceInputStatus('Preparing microphone...');
+
+      recognition.onstart = () => {
+        if (!conversationActiveRef.current) return;
+        setVoiceInputStatus('Listening now. Ask a FlightLine question.');
+      };
+
+      recognition.onspeechstart = () => {
+        if (!conversationActiveRef.current) return;
+        setVoiceInputStatus('Heard speech. Keep going...');
+      };
+
+      recognition.onspeechend = () => {
+        if (!conversationActiveRef.current) return;
+        setVoiceInputStatus('Processing FlightLine request...');
+      };
 
       recognition.onresult = (event) => {
         handledResult = true;
@@ -741,7 +765,7 @@
 
         const errorName = event?.error || 'unknown';
         if (errorName === 'no-speech') {
-          setVoiceInputStatus('Still listening. Ask a FlightLine question.');
+          setVoiceInputStatus('I did not catch that. Still listening for a FlightLine question.');
           scheduleNextListening();
           return;
         }
@@ -755,7 +779,7 @@
         setIsListening(false);
         recognitionRef.current = null;
         if (conversationActiveRef.current && !handledResult) {
-          setVoiceInputStatus('Still listening. Ask a FlightLine question.');
+          setVoiceInputStatus('Listening paused. Reopening microphone...');
           scheduleNextListening();
         }
       };
