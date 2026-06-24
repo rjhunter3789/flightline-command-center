@@ -19,19 +19,23 @@ export const playPremiumFlightAttendantBriefing = async ({
   mode = 'short',
   text,
   onStatus,
+  onPreparing,
   onFallback
 }) => {
   stopPremiumFlightAttendantAudio();
 
   const setStatus = typeof onStatus === 'function' ? onStatus : () => {};
+  const setPreparing = typeof onPreparing === 'function' ? onPreparing : () => {};
   const fallback = typeof onFallback === 'function' ? onFallback : () => {};
 
   if (!text) {
+    setPreparing(false);
     setStatus('No briefing available to speak.');
     return false;
   }
 
-  setStatus('Requesting premium voice...');
+  setPreparing(true);
+  setStatus('Generating premium voice...');
 
   try {
     const response = await fetch('/api/flight-attendant/tts', {
@@ -49,6 +53,7 @@ export const playPremiumFlightAttendantBriefing = async ({
     const contentType = response.headers.get('content-type') || '';
 
     if (!response.ok || !contentType.includes('audio/')) {
+      setPreparing(false);
       setStatus('Premium voice unavailable. Using device voice.');
       fallback();
       return false;
@@ -73,11 +78,13 @@ export const playPremiumFlightAttendantBriefing = async ({
     };
 
     setStatus('Speaking with premium voice');
+    setPreparing(false);
     await audio.play();
     return true;
   } catch (error) {
     console.error('Premium voice error:', error);
     stopPremiumFlightAttendantAudio();
+    setPreparing(false);
     setStatus('Premium voice unavailable. Using device voice.');
     fallback();
     return false;

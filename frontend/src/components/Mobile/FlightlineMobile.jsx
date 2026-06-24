@@ -8,7 +8,7 @@
   import React, { useState, useEffect } from 'react';
   import { useRealTimeData } from '../../hooks/useRealTimeData';
   import './FlightlineMobile.css';
-import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
+  import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
 
   const dealStages = [
     "Showroom",
@@ -386,6 +386,7 @@ import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } f
     const [briefingMode, setBriefingMode] = useState('short');
     const [availableVoices, setAvailableVoices] = useState([]);
     const [voiceStatus, setVoiceStatus] = useState('Native browser voice');
+    const [isGeneratingPremiumVoice, setIsGeneratingPremiumVoice] = useState(false);
 
     useEffect(() => {
       if (!('speechSynthesis' in window)) return;
@@ -421,6 +422,7 @@ import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } f
 
     const stopSpeaking = () => {
       stopPremiumFlightAttendantAudio();
+      setIsGeneratingPremiumVoice(false);
 
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -454,6 +456,8 @@ import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } f
     };
 
     const speakBriefing = async () => {
+      if (isGeneratingPremiumVoice) return;
+
       stopPremiumFlightAttendantAudio();
 
       if ('speechSynthesis' in window) {
@@ -465,6 +469,7 @@ import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } f
         mode: briefingMode,
         text: briefing,
         onStatus: setVoiceStatus,
+        onPreparing: setIsGeneratingPremiumVoice,
         onFallback: speakWithNativeBrowserVoice
       });
     };
@@ -476,8 +481,12 @@ import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } f
             <h2 className="section-title">Flight Attendant</h2>
             <p className="section-hint">Read-only voice briefing for the status board</p>
           </div>
-          <button className="flight-attendant-speak" onClick={speakBriefing}>
-            Speak Briefing
+          <button
+            className="flight-attendant-speak"
+            onClick={speakBriefing}
+            disabled={isGeneratingPremiumVoice}
+          >
+            {isGeneratingPremiumVoice ? 'Generating...' : 'Speak Briefing'}
           </button>
         </div>
 
