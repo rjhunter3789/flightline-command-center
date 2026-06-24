@@ -166,7 +166,7 @@ replaceOnce(
   'native browser speech function accepts text',
   `    const speakWithNativeBrowserVoice = () => {
       if (!('speechSynthesis' in window)) {
-        setBriefing(\`${briefing} Voice readout is not supported in this browser.\`);
+        setBriefing(\`\${briefing} Voice readout is not supported in this browser.\`);
         return;
       }
 
@@ -174,7 +174,7 @@ replaceOnce(
       const utterance = new SpeechSynthesisUtterance(briefing);`,
   `    const speakWithNativeBrowserVoice = (textToSpeak = briefing) => {
       if (!('speechSynthesis' in window)) {
-        setBriefing(\`${textToSpeak} Voice readout is not supported in this browser.\`);
+        setBriefing(\`\${textToSpeak} Voice readout is not supported in this browser.\`);
         return;
       }
 
@@ -239,7 +239,7 @@ replaceOnce(
       }
 
       const nextBriefing = handleBriefing(mappedCommand.briefingType, briefingMode);
-      setVoiceInputStatus(\`Heard: ${mappedCommand.label}.\`);
+      setVoiceInputStatus(\`Heard: \${mappedCommand.label}.\`);
       await speakBriefingText(mappedCommand.briefingType, briefingMode, nextBriefing);
     };
 
@@ -283,7 +283,7 @@ replaceOnce(
       recognition.onerror = (event) => {
         setIsListening(false);
         recognitionRef.current = null;
-        const errorText = event?.error ? \`Voice input stopped: ${event.error}.\` : 'Voice input stopped.';
+        const errorText = event?.error ? \`Voice input stopped: \${event.error}.\` : 'Voice input stopped.';
         setVoiceInputStatus(errorText);
       };
 
