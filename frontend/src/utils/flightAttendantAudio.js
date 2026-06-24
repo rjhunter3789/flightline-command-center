@@ -1,12 +1,46 @@
 let activePremiumAudio = null;
 let activePremiumAudioUrl = null;
+let primedPremiumAudio = null;
+
+const SILENT_AUDIO_DATA_URL = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAAAA==';
+
+const getReusablePremiumAudio = () => {
+  if (primedPremiumAudio) return primedPremiumAudio;
+
+  primedPremiumAudio = new Audio();
+  primedPremiumAudio.preload = 'auto';
+  primedPremiumAudio.playsInline = true;
+  return primedPremiumAudio;
+};
+
+export const primeFlightAttendantAudio = async ({ onStatus } = {}) => {
+  const setStatus = typeof onStatus === 'function' ? onStatus : () => {};
+
+  try {
+    const audio = getReusablePremiumAudio();
+    audio.muted = true;
+    audio.src = SILENT_AUDIO_DATA_URL;
+    audio.currentTime = 0;
+    await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = false;
+    setStatus('Premium voice audio ready');
+    return true;
+  } catch (error) {
+    console.warn('Flight Attendant audio prime failed:', error);
+    setStatus('Premium voice will start after browser allows audio');
+    return false;
+  }
+};
 
 export const stopPremiumFlightAttendantAudio = () => {
   if (activePremiumAudio) {
     activePremiumAudio.pause();
     activePremiumAudio.currentTime = 0;
-    activePremiumAudio = null;
   }
+
+  activePremiumAudio = null;
 
   if (activePremiumAudioUrl) {
     URL.revokeObjectURL(activePremiumAudioUrl);
@@ -56,14 +90,14 @@ export const playPremiumFlightAttendantBriefing = async ({
 
     if (!response.ok || !contentType.includes('audio/')) {
       setPreparing(false);
-      setStatus('Premium voice unavailable. Using device voice.');
+      setStatus('Premium voice unavailable. Tap Speak Briefing or try again.');
       fallback();
       return false;
     }
 
     const audioBlob = await response.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
+    const audio = getReusablePremiumAudio();
 
     activePremiumAudio = audio;
     activePremiumAudioUrl = audioUrl;
@@ -76,9 +110,15 @@ export const playPremiumFlightAttendantBriefing = async ({
 
     audio.onerror = () => {
       stopPremiumFlightAttendantAudio();
-      setStatus('Premium voice playback failed. Using device voice.');
+      setPreparing(false);
+      setStatus('Premium voice playback failed. Tap Speak Briefing or try again.');
       fallback();
     };
+
+    audio.muted = false;
+    audio.src = audioUrl;
+    audio.currentTime = 0;
+    audio.load();
 
     setStatus('Speaking with premium voice');
     setPreparing(false);
@@ -88,7 +128,7 @@ export const playPremiumFlightAttendantBriefing = async ({
     console.error('Premium voice error:', error);
     stopPremiumFlightAttendantAudio();
     setPreparing(false);
-    setStatus('Premium voice unavailable. Using device voice.');
+    setStatus('Premium voice blocked by browser. Tap Speak Briefing or try again.');
     fallback();
     return false;
   }

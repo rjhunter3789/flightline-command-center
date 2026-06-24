@@ -8,7 +8,7 @@
   import React, { useState, useEffect, useRef } from 'react';
   import { useRealTimeData } from '../../hooks/useRealTimeData';
   import './FlightlineMobile.css';
-  import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
+  import { playPremiumFlightAttendantBriefing, primeFlightAttendantAudio, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
 
   const dealStages = [
     "Showroom",
@@ -772,6 +772,7 @@
         return;
       }
 
+      primeFlightAttendantAudio({ onStatus: setVoiceStatus });
       conversationActiveRef.current = true;
       setConversationActive(true);
       setVoiceInputStatus('Conversation active. Ask about FlightLine deal activity only.');
