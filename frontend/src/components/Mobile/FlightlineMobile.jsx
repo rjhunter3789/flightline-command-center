@@ -568,6 +568,13 @@
         mediaRecorderRef.current.stop();
       }
 
+      mediaRecorderRef.current = null;
+
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+
       setIsListening(false);
     };
 
@@ -736,16 +743,8 @@
       }
     };
 
-    function startListeningForCommand() {
+    async function startListeningForCommand() {
       if (!conversationActiveRef.current || isListening || isGeneratingPremiumVoice) return;
-
-      const stream = mediaStreamRef.current;
-      if (!stream || !stream.active) {
-        setVoiceInputStatus('Microphone session ended. Tap Talk to restart.');
-        conversationActiveRef.current = false;
-        setConversationActive(false);
-        return;
-      }
 
       if (typeof MediaRecorder === 'undefined') {
         setVoiceInputStatus('Voice session recording is not supported in this browser.');
@@ -758,14 +757,22 @@
       const recorderOptions = mimeType ? { mimeType } : undefined;
       const audioChunks = [];
 
+      let stream;
       let recorder;
       try {
+        setVoiceInputStatus('Opening fresh microphone for this turn...');
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
         recorder = new MediaRecorder(stream, recorderOptions);
       } catch (error) {
-        console.error('Flight Attendant MediaRecorder failed:', error);
-        setVoiceInputStatus('Could not open microphone recorder. Tap Talk to restart.');
+        console.error('Flight Attendant fresh microphone turn failed:', error);
+        setVoiceInputStatus('Could not open microphone for this turn. Tap Talk to restart.');
         conversationActiveRef.current = false;
         setConversationActive(false);
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+        mediaStreamRef.current = null;
         return;
       }
 
@@ -796,6 +803,11 @@
       recorder.onstop = async () => {
         setIsListening(false);
         mediaRecorderRef.current = null;
+
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
 
         if (!conversationActiveRef.current) return;
 
@@ -865,8 +877,8 @@
 
       try {
         setVoiceInputStatus('Requesting microphone access...');
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaStreamRef.current = stream;
+        const permissionStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        permissionStream.getTracks().forEach((track) => track.stop());
         primeFlightAttendantAudio({ onStatus: setVoiceStatus });
         conversationActiveRef.current = true;
         setConversationActive(true);
