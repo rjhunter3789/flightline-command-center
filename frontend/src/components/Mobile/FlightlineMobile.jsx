@@ -5,7 +5,7 @@
    * This file is proprietary and confidential.
    */
 
-  import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect, useRef } from 'react';
   import { useRealTimeData } from '../../hooks/useRealTimeData';
   import './FlightlineMobile.css';
   import { playPremiumFlightAttendantBriefing, stopPremiumFlightAttendantAudio } from '../../utils/flightAttendantAudio';
@@ -308,6 +308,47 @@
       || voices[0];
   };
 
+  const getSpeechRecognitionApi = () => {
+    if (typeof window === 'undefined') return null;
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  };
+
+  const normalizeFlightAttendantCommand = (text = '') => {
+    return String(text)
+      .toLowerCase()
+      .replace(/[^\w\s']/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const mapFlightAttendantVoiceCommand = (text = '') => {
+    const command = normalizeFlightAttendantCommand(text);
+
+    if (!command) return null;
+
+    if (command.includes('stop speaking') || command.includes('stop playback') || command === 'stop') {
+      return { action: 'stop', label: 'Stop Speaking' };
+    }
+
+    if (command.includes('active deal summary') || command.includes('active deals') || command.includes('active deal')) {
+      return { action: 'briefing', briefingType: 'activeDeals', label: 'Active Deal Summary' };
+    }
+
+    if (command.includes('deal flow') || command.includes('pipeline')) {
+      return { action: 'briefing', briefingType: 'dealFlow', label: 'Deal Flow Summary' };
+    }
+
+    if (command.includes("today's snapshot") || command.includes('todays snapshot') || command.includes('snapshot')) {
+      return { action: 'briefing', briefingType: 'snapshot', label: "Today's Snapshot" };
+    }
+
+    if (command.includes('what needs attention') || command.includes('needs attention') || command.includes('attention')) {
+      return { action: 'briefing', briefingType: 'attention', label: 'What Needs Attention' };
+    }
+
+    return null;
+  };
+
   const buildFlightAttendantBriefing = (type, deals, countsByStage, mode = 'standard') => {
     const totalDeals = deals.length;
     const showroom = countsByStage.Showroom || 0;
@@ -386,7 +427,24 @@
     const [briefingMode, setBriefingMode] = useState('short');
     const [availableVoices, setAvailableVoices] = useState([]);
     const [voiceStatus, setVoiceStatus] = useState('Native browser voice');
+    const [voiceInputStatus, setVoiceInputStatus] = useState('Tap Talk to ask for a read-only briefing.');
+    const [recognizedCommand, setRecognizedCommand] = useState('');
     const [isGeneratingPremiumVoice, setIsGeneratingPremiumVoice] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef(null);
+
+    useEffect(() => {
+      return () => {
+        if (recognitionRef.current) {
+          recognitionRef.current.abort();
+          recognitionRef.current = null;
+        }
+        stopPremiumFlightAttendantAudio();
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      };
+    }, []);
 
     useEffect(() => {
       if (!('speechSynthesis' in window)) return;
@@ -409,8 +467,10 @@
     }, []);
 
     const handleBriefing = (type, mode = briefingMode) => {
+      const nextBriefing = buildFlightAttendantBriefing(type, deals, countsByStage, mode);
       setActiveBriefing(type);
-      setBriefing(buildFlightAttendantBriefing(type, deals, countsByStage, mode));
+      setBriefing(nextBriefing);
+      return nextBriefing;
     };
 
     const handleModeChange = (mode) => {
@@ -421,6 +481,12 @@
     };
 
     const stopSpeaking = () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+        recognitionRef.current = null;
+      }
+
+      setIsListening(false);
       stopPremiumFlightAttendantAudio();
       setIsGeneratingPremiumVoice(false);
 
@@ -428,17 +494,18 @@
         window.speechSynthesis.cancel();
       }
 
+      setVoiceInputStatus('Voice input stopped.');
       setVoiceStatus('Speech stopped');
     };
 
-    const speakWithNativeBrowserVoice = () => {
+    const speakWithNativeBrowserVoice = (textToSpeak = briefing) => {
       if (!('speechSynthesis' in window)) {
-        setBriefing(`${briefing} Voice readout is not supported in this browser.`);
+        setBriefing(`${textToSpeak} Voice readout is not supported in this browser.`);
         return;
       }
 
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(briefing);
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
       const preferredVoice = choosePreferredVoice(availableVoices.length ? availableVoices : window.speechSynthesis.getVoices());
 
       if (preferredVoice) {
@@ -455,7 +522,7 @@
       window.speechSynthesis.speak(utterance);
     };
 
-    const speakBriefing = async () => {
+    const speakBriefingText = async (type = activeBriefing || 'activeDeals', mode = briefingMode, textToSpeak = briefing) => {
       if (isGeneratingPremiumVoice) return;
 
       stopPremiumFlightAttendantAudio();
@@ -465,13 +532,90 @@
       }
 
       await playPremiumFlightAttendantBriefing({
-        briefingType: activeBriefing || 'activeDeals',
-        mode: briefingMode,
-        text: briefing,
+        briefingType: type,
+        mode,
+        text: textToSpeak,
         onStatus: setVoiceStatus,
         onPreparing: setIsGeneratingPremiumVoice,
-        onFallback: speakWithNativeBrowserVoice
+        onFallback: () => speakWithNativeBrowserVoice(textToSpeak)
       });
+    };
+
+    const speakBriefing = async () => {
+      await speakBriefingText(activeBriefing || 'activeDeals', briefingMode, briefing);
+    };
+
+    const runVoiceCommand = async (spokenText) => {
+      const mappedCommand = mapFlightAttendantVoiceCommand(spokenText);
+
+      if (!mappedCommand) {
+        setVoiceInputStatus('Command not recognized. Try active deals, deal flow, snapshot, or attention.');
+        return;
+      }
+
+      if (mappedCommand.action === 'stop') {
+        stopSpeaking();
+        return;
+      }
+
+      const nextBriefing = handleBriefing(mappedCommand.briefingType, briefingMode);
+      setVoiceInputStatus(`Heard: ${mappedCommand.label}.`);
+      await speakBriefingText(mappedCommand.briefingType, briefingMode, nextBriefing);
+    };
+
+    const startVoiceInput = () => {
+      if (isListening || isGeneratingPremiumVoice) return;
+
+      const SpeechRecognition = getSpeechRecognitionApi();
+      if (!SpeechRecognition) {
+        setVoiceInputStatus('Voice input is not supported in this browser. Use the briefing buttons or Speak Briefing.');
+        return;
+      }
+
+      stopPremiumFlightAttendantAudio();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognitionRef.current = recognition;
+      setIsListening(true);
+      setRecognizedCommand('');
+      setVoiceInputStatus('Listening...');
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results || [])
+          .map((result) => result[0]?.transcript || '')
+          .join(' ')
+          .trim();
+
+        setRecognizedCommand(transcript);
+        setIsListening(false);
+        recognitionRef.current = null;
+        runVoiceCommand(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        setIsListening(false);
+        recognitionRef.current = null;
+        const errorText = event?.error ? `Voice input stopped: ${event.error}.` : 'Voice input stopped.';
+        setVoiceInputStatus(errorText);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+        setVoiceInputStatus((currentStatus) => (
+          currentStatus === 'Listening...' ? 'Voice input ended. Tap Talk to try again.' : currentStatus
+        ));
+      };
+
+      recognition.start();
     };
 
     return (
@@ -481,17 +625,30 @@
             <h2 className="section-title">Flight Attendant</h2>
             <p className="section-hint">Read-only voice briefing for the status board</p>
           </div>
-          <button
-            className="flight-attendant-speak"
-            onClick={speakBriefing}
-            disabled={isGeneratingPremiumVoice}
-          >
-            {isGeneratingPremiumVoice ? 'Generating...' : 'Speak Briefing'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              className="flight-attendant-speak"
+              onClick={startVoiceInput}
+              disabled={isListening || isGeneratingPremiumVoice}
+            >
+              {isListening ? 'Listening...' : 'Talk'}
+            </button>
+            <button
+              className="flight-attendant-speak"
+              onClick={speakBriefing}
+              disabled={isGeneratingPremiumVoice || isListening}
+            >
+              {isGeneratingPremiumVoice ? 'Generating...' : 'Speak Briefing'}
+            </button>
+          </div>
         </div>
 
         <div className="flight-attendant-card">
           <p className="flight-attendant-script">{briefing}</p>
+          <p className="flight-attendant-voice-status">{voiceInputStatus}</p>
+          {recognizedCommand && (
+            <p className="flight-attendant-voice-status">Heard: “{recognizedCommand}”</p>
+          )}
           <p className="flight-attendant-voice-status">{voiceStatus}</p>
         </div>
 
@@ -512,6 +669,10 @@
             Stop Speaking
           </button>
         </div>
+
+        <p className="flight-attendant-voice-status">
+          Try: “active deals”, “deal flow”, “today's snapshot”, “what needs attention”, or “stop speaking”.
+        </p>
 
         <div className="flight-attendant-actions">
           <button
