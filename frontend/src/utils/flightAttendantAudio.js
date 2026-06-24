@@ -20,13 +20,15 @@ export const playPremiumFlightAttendantBriefing = async ({
   text,
   onStatus,
   onPreparing,
-  onFallback
+  onFallback,
+  onEnded
 }) => {
   stopPremiumFlightAttendantAudio();
 
   const setStatus = typeof onStatus === 'function' ? onStatus : () => {};
   const setPreparing = typeof onPreparing === 'function' ? onPreparing : () => {};
   const fallback = typeof onFallback === 'function' ? onFallback : () => {};
+  const ended = typeof onEnded === 'function' ? onEnded : () => {};
 
   if (!text) {
     setPreparing(false);
@@ -69,6 +71,7 @@ export const playPremiumFlightAttendantBriefing = async ({
     audio.onended = () => {
       stopPremiumFlightAttendantAudio();
       setStatus('Premium voice ready');
+      ended();
     };
 
     audio.onerror = () => {
