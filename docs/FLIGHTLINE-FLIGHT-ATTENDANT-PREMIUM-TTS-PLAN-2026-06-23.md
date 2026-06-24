@@ -1,49 +1,75 @@
-# Flightline Flight Attendant Premium TTS Plan - June 23, 2026
+# FlightLine Flight Attendant Premium TTS Plan - June 23, 2026
 
 ## Purpose
 
-This document defines the recommended premium voice path for Flight Attendant after v1.1 confirmed that browser speech readout works but is not production quality.
+This document defines the premium voice path for Flight Attendant after v1.1 confirmed that browser speech readout worked but was not production quality.
 
-Flight Attendant v1.1 is the stable native-browser baseline. Premium voice generation now runs through the Flightline backend.
+Flight Attendant is the voice/persona. FlightLine is the platform and operational command board.
+
+Premium voice generation now runs through the FlightLine backend and plays through FlightLine Mobile.
 
 ## Current Baseline
 
 | Area | Current State |
 |---|---|
-| Flight Attendant v1.1 | Confirmed working |
+| Flight Attendant panel | Confirmed working in FlightLine Mobile |
 | Short mode | Working |
 | Standard mode | Working |
-| Speak Briefing | Working |
-| Stop Speaking | Working |
+| Speak Briefing | Working with premium voice first |
+| Stop Speaking | Working with premium audio and native fallback |
 | Voice/status line | Working |
-| Native browser voice | Usable fallback baseline |
+| Native browser voice | Available as fallback |
 | Backend voice stub | Confirmed working |
 | Premium voice provider | OpenAI path configured and verified server-side |
 | Premium audio response | Confirmed `audio/mpeg` MP3 response |
+| Frontend premium playback | Confirmed working on iPhone |
+| Latency polish | Confirmed working with `Generating...` button state |
+| Customer-facing naming | `FlightLine` for platform, `Flight Attendant` for voice/persona |
 | Microphone input | Not implemented |
 | Write actions | Not implemented and intentionally excluded |
 
+## Naming Standard
+
+Use this hierarchy in product copy and spoken briefings:
+
+```text
+FlightLine = platform / command board / operational system
+Flight Attendant = voice assistant / persona
+flightline.autoauditpro.io = lowercase domain
+```
+
+Examples:
+
+```text
+FlightLine active deal summary
+FlightLine deal flow summary
+FlightLine today's snapshot
+FlightLine attention summary
+```
+
+Do not use `Flight Attendant active deal summary` because Flight Attendant is the speaker, not the board.
+
 ## Core Decision
 
-Do not place premium voice provider credentials in the React frontend.
+Do not place premium voice provider configuration in the React frontend.
 
 The architecture is:
 
 ```text
-Flightline Mobile
-  -> Flightline backend voice endpoint
+FlightLine Mobile
+  -> FlightLine backend voice endpoint
   -> Premium voice provider
   -> Audio response
   -> Mobile browser playback
 ```
 
-This keeps sensitive configuration server-side and allows Flightline to enforce usage limits, privacy controls, fallback behavior, and future provider changes.
+This keeps sensitive configuration server-side and allows FlightLine to enforce usage limits, privacy controls, fallback behavior, and future provider changes.
 
 ## Recommended Architecture
 
 ### Frontend
 
-Flightline Mobile should keep the existing Flight Attendant panel and add premium playback only after the backend voice endpoint exists.
+FlightLine Mobile keeps the existing Flight Attendant panel and uses backend premium playback when available.
 
 Frontend responsibilities:
 
@@ -54,10 +80,11 @@ Frontend responsibilities:
 - Fall back to native browser speech if premium voice fails.
 - Preserve Short and Standard mode.
 - Preserve Stop Speaking.
+- Show a clear generating state during premium voice preparation.
 
 ### Backend
 
-Flightline backend owns all premium voice provider interaction.
+FlightLine backend owns all premium voice provider interaction.
 
 Backend responsibilities:
 
@@ -71,7 +98,7 @@ Backend responsibilities:
 
 ### Provider Layer
 
-The premium voice provider is isolated behind a backend service module so Flightline can switch providers later without rewriting the frontend.
+The premium voice provider is isolated behind a backend service module so FlightLine can switch providers later without rewriting the frontend.
 
 Current provider path:
 
@@ -87,7 +114,13 @@ Model: gpt-4o-mini-tts
 Voice: nova
 Format: mp3
 Speed: 0.95
-Flightline text cap: 1200 characters
+FlightLine text cap: 1200 characters
+```
+
+Frontend helper path:
+
+```text
+frontend/src/utils/flightAttendantAudio.js
 ```
 
 ## Guardrails
@@ -136,6 +169,7 @@ Recommended controls:
 - No auto-speak by default in early pilot.
 - Track provider, character count, and request count.
 - Keep native browser speech as fallback.
+- Do not pre-generate audio until usage and cost controls are defined.
 
 ## Failure Handling
 
@@ -143,13 +177,13 @@ If premium voice fails:
 
 1. Show a friendly message in the Flight Attendant panel.
 2. Fall back to native browser speech.
-3. Do not block the rest of Flightline Mobile.
+3. Do not block the rest of FlightLine Mobile.
 4. Do not repeatedly retry without user action.
 
 Expected fallback message:
 
 ```text
-Premium voice is unavailable right now. Using device voice.
+Premium voice unavailable. Using device voice.
 ```
 
 ## Implementation Phases
@@ -217,15 +251,66 @@ Confirmed:
 
 ### Phase 4 - Frontend Premium Playback
 
-Status: next build step.
+Status: complete and confirmed working on iPhone.
 
-- Add Premium Voice option or make Speak Briefing prefer backend voice when configured.
-- Play returned audio in mobile browser.
-- Keep Stop Speaking behavior.
-- Fall back to browser speech on provider failure.
-- Avoid auto-speak by default.
+Implemented:
+
+- Added frontend premium audio helper.
+- Wired `Speak Briefing` to call backend premium voice endpoint first.
+- Played returned MP3 audio in mobile browser.
+- Preserved Stop Speaking behavior.
+- Preserved native browser speech fallback.
+- Preserved Short and Standard modes.
+
+Confirmed:
+
+- Premium voice playback works smoothly.
+- Voice quality is good.
+- Short briefing works.
+- Standard briefing works.
+- Stop Speaking stops premium audio.
+- Frontend production build passed with only existing non-blocking dashboard warnings.
+
+### Phase 4.1 - Premium Voice Latency Polish
+
+Status: complete and confirmed working on iPhone.
+
+Implemented:
+
+- Changed waiting status to `Generating premium voice...`.
+- Changed Speak Briefing button to `Generating...` while premium audio is being prepared.
+- Disabled Speak Briefing while audio generation is in progress.
+- Re-enabled the button after audio starts, fails, or falls back.
+- Kept Short mode as default.
+- Did not add pre-generation to avoid unnecessary usage.
+
+Confirmed:
+
+- Standard briefing delay is clearer to the user.
+- Button state behaves as expected.
+- Premium voice still plays correctly.
+- Stop Speaking still works.
+
+### Phase 4.2 - Customer-Facing Naming Polish
+
+Status: complete and confirmed working on iPhone.
+
+Implemented:
+
+- Changed visible product label from `Flightline` to `FlightLine`.
+- Changed demo badge from `Flightline Demo` to `FlightLine Demo`.
+- Changed standard spoken briefing labels to use `FlightLine`.
+- Kept the domain lowercase.
+
+Confirmed:
+
+- Header displays `FlightLine`.
+- Demo badge displays `FlightLine Demo`.
+- Standard briefing text and speech use `FlightLine active deal summary`.
 
 ### Phase 5 - Pilot Controls
+
+Status: future step.
 
 - Add authenticated pilot access.
 - Add privacy mode toggle.
@@ -234,8 +319,8 @@ Status: next build step.
 
 ## Current Recommendation
 
-Phase 3 is complete server-side. Flightline can now generate OpenAI premium voice audio from the backend.
+Phase 4, Phase 4.1, and Phase 4.2 are complete.
 
-The next build step should be Phase 4: frontend premium playback.
+Flight Attendant now provides a working premium voice readout for FlightLine Mobile while keeping native browser speech as fallback.
 
-Do not add microphone input or write actions yet.
+The next major step should be pilot controls and usage/cost monitoring, not microphone input or write actions.
