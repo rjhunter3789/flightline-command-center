@@ -7,6 +7,7 @@
 **System:** FlightLine Command Center  
 **Assistant Persona:** Flight Attendant  
 **Domain:** `flightline.autoauditpro.io`  
+**Related Acceptance:** `docs/FLIGHTLINE-IOS-CARPLAY-SHELL-ACCEPTANCE-2026-06-24.md`
 
 ---
 
@@ -26,6 +27,8 @@ The accepted implementation uses:
 The critical failure was isolated and resolved in Phase 6C. Earlier versions could answer the first spoken question but failed to capture usable audio on follow-up turns. Phase 6B instrumentation proved the follow-up recording was only sending approximately `5` bytes. Phase 6C fixed the issue by reopening a fresh microphone stream for each voice turn. After Phase 6C, follow-up voice turns recorded healthy audio payloads of approximately `138,000–139,000` bytes and produced correct FlightLine responses.
 
 Flight Attendant is now able to conduct a scoped, multi-turn voice session while remaining inside FlightLine deal-activity boundaries.
+
+Later the same evening, the native iOS / CarPlay foundation was also validated separately: the FlightLine App ID was created, the CarPlay Voice Based Conversation capability was attached in Xcode, and a clean native iOS shell successfully built. That acceptance is documented separately in `docs/FLIGHTLINE-IOS-CARPLAY-SHELL-ACCEPTANCE-2026-06-24.md`.
 
 ---
 
@@ -198,7 +201,9 @@ Accepted constraints:
 - No automatic workflow triggers
 - No background listening after the user ends the session
 - No wake word in the current MVP
-- No CarPlay-specific behavior until native iOS architecture and entitlement path are ready
+- No CarPlay-specific behavior inside the mobile web MVP
+
+The native iOS / CarPlay shell is now established, but CarPlay-specific behavior is still a separate future implementation phase and must preserve the same read-only guardrails.
 
 ---
 
@@ -277,6 +282,21 @@ Existing accepted TTS configuration:
 - Format: MP3
 - Premium voice playback on mobile
 
+### Native iOS / CarPlay Shell
+
+Native iOS shell foundation is documented separately:
+
+```text
+docs/FLIGHTLINE-IOS-CARPLAY-SHELL-ACCEPTANCE-2026-06-24.md
+```
+
+Accepted native foundation:
+
+- Bundle ID: `io.autoauditpro.flightline`
+- Team: `JEFFREY LEE ROBINSON`
+- Capability: `CarPlay Voice Based Conversation`
+- Build result: `Build Succeeded`
+
 ---
 
 ## 8. Phase History
@@ -346,6 +366,18 @@ Result:
 - Healthy audio payloads observed: `139447` and `138532` bytes.
 - Multi-turn Flight Attendant voice session accepted.
 
+### Native iOS / CarPlay Shell Foundation
+
+Created a clean native iOS shell for FlightLine and attached the approved CarPlay Voice Based Conversation capability.
+
+Result:
+
+- FlightLine App ID created.
+- Bundle ID confirmed: `io.autoauditpro.flightline`.
+- Team signing confirmed: `JEFFREY LEE ROBINSON`.
+- CarPlay Voice Based Conversation capability added in Xcode.
+- Native shell build succeeded.
+
 ---
 
 ## 9. Accepted Commits
@@ -359,6 +391,13 @@ Result:
 | Phase 6 | `8d72396` | Add Flight Attendant backend voice session Phase 6 |
 | Phase 6B | `da6db6e` | Clarify Flight Attendant voice turn capture |
 | Phase 6C | `331804d` | Use fresh microphone stream for Flight Attendant turns |
+
+Documentation commits:
+
+| Document | Commit | Description |
+|---|---|---|
+| Voice session acceptance | `44f8375` | Document Flight Attendant voice session acceptance |
+| Native iOS / CarPlay shell acceptance | `3265a7e` | Document FlightLine iOS CarPlay shell acceptance |
 
 ---
 
@@ -402,6 +441,18 @@ PM2 backend restart, only required after backend changes:
 pm2 restart flightline-backend
 ```
 
+Native Xcode shell build:
+
+```text
+Command + B
+```
+
+Expected:
+
+```text
+Build Succeeded
+```
+
 ---
 
 ## 11. Current Known Limitations
@@ -416,7 +467,8 @@ Known limitations:
 - There is no wake word.
 - There is no background listening after stop/end session.
 - CarPlay behavior is not part of this web MVP.
-- Native iOS / CarPlay should be evaluated separately after entitlement and app architecture are finalized.
+- Native iOS / CarPlay shell exists, but native Flight Attendant integration is not yet implemented.
+- CarPlay-specific templates, lifecycle handling, and test flows remain future work.
 
 ---
 
@@ -425,23 +477,27 @@ Known limitations:
 Recommended next steps:
 
 1. Lock Phase 6C as the accepted mobile web MVP.
-2. Add a small persistent session state indicator:
+2. Lock the native iOS / CarPlay shell foundation as accepted.
+3. Add a small persistent session state indicator:
    - Listening
    - Recording
    - Processing
    - Speaking
    - Waiting for next turn
-3. Add optional server-side event logging for:
+4. Add optional server-side event logging for:
    - audio byte size
    - transcript
    - matched intent
    - response mode
    - transcription errors
-4. Add a privacy note in UI:
+5. Add a privacy note in UI:
    - Voice is processed only during active Talk sessions.
    - Flight Attendant does not listen after End/Stop.
-5. Evaluate native iOS architecture for CarPlay after entitlement path is complete.
-6. Consider streaming voice architecture later only if the MVP turn-based model proves too slow for field use.
+6. Decide Phase 7 direction:
+   - WebView wrapper around accepted mobile web MVP, or
+   - Native SwiftUI voice interface calling existing backend endpoints
+7. Evaluate CarPlay-specific interface requirements after the base native iOS app is functional and testable on the phone.
+8. Consider streaming voice architecture later only if the MVP turn-based model proves too slow for field use.
 
 ---
 
@@ -452,5 +508,7 @@ Flight Attendant voice session MVP is accepted as of Phase 6C.
 The accepted implementation solves the original issue: Flight Attendant can now answer an initial voice command, reopen the mic, capture a follow-up voice command, transcribe it through the backend, route it to a FlightLine-only response, and speak the result back to the user.
 
 The system also correctly rejects out-of-scope general assistant requests such as weather.
+
+The Apple/Xcode foundation for a native FlightLine iOS / CarPlay path is also accepted separately: App ID, signing, CarPlay Voice Based Conversation capability, and native shell build have all been validated.
 
 **Final Status:** GREEN / ACCEPTED
