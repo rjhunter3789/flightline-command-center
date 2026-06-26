@@ -1,13 +1,48 @@
 # FlightLine Integration Layer Foundation — Phase 7
 
 **Date:** 2026-06-25  
-**Status:** Foundation patch prepared  
+**Status:** GREEN / ACCEPTED  
+**Accepted Commit:** `a6ee6ba Add FlightLine integration layer foundation Phase 7`  
 **Scope:** Read-only integration architecture  
 **System:** FlightLine Command Center  
 
 ---
 
-## 1. Purpose
+## 1. Acceptance Summary
+
+Phase 7 is accepted.
+
+FlightLine now has a live read-only integration layer foundation for DMS, CRM, inventory, and generic API provider connections.
+
+Final validation confirmed:
+
+```text
+Backend restart: online
+Smoke tests: passed
+Git status: clean
+```
+
+Validated endpoints:
+
+```text
+/api/integrations/status       GREEN
+/api/integrations/providers    GREEN
+/api/integrations/mock/health  GREEN
+/api/integrations/mock/deals   GREEN
+```
+
+The core acceptance signals were present in the smoke-test responses:
+
+```json
+{
+  "success": true,
+  "readOnly": true
+}
+```
+
+---
+
+## 2. Purpose
 
 Phase 7 establishes a clean integration layer so FlightLine can eventually connect to DMS, CRM, and inventory systems without hardwiring every vendor directly into the app.
 
@@ -19,9 +54,11 @@ Provider connector → FlightLine normalizer → FlightLine canonical object →
 
 FlightLine should not care whether a deal, customer, vehicle, or activity came from Reynolds, VinSolutions, DriveCentric, Tekion, CDK, or a generic provider. Each connector is responsible for provider-specific details. FlightLine consumes normalized internal objects.
 
+This prevents vendor-specific spaghetti and gives FlightLine a scalable enterprise foundation.
+
 ---
 
-## 2. Phase 7 Rules
+## 3. Phase 7 Rules
 
 Phase 7 is read-only.
 
@@ -39,7 +76,7 @@ This layer is for observing, normalizing, and exposing data to FlightLine.
 
 ---
 
-## 3. New Backend Namespace
+## 4. Backend Namespace
 
 Phase 7 adds:
 
@@ -61,7 +98,7 @@ GET /api/integrations/:provider/activities
 
 ---
 
-## 4. New Backend Files
+## 5. Backend Files Added
 
 ```text
 backend/src/routes/integrationRoutes.js
@@ -73,9 +110,21 @@ backend/src/integrations/connectors/StubConnector.js
 backend/src/integrations/normalizers/flightlineNormalizer.js
 ```
 
+Updated:
+
+```text
+backend/src/server.js
+```
+
+`server.js` now mounts:
+
+```text
+/api/integrations
+```
+
 ---
 
-## 5. Registered Providers
+## 6. Registered Providers
 
 Initial provider registry:
 
@@ -91,9 +140,11 @@ Initial provider registry:
 
 Only the mock connector returns sample data. Vendor connectors are placeholders until credentials and API contracts are available.
 
+This is intentional. FlightLine should not pretend to have Reynolds, VinSolutions, DriveCentric, Tekion, or CDK access before credentials and provider contracts exist.
+
 ---
 
-## 6. Canonical FlightLine Objects
+## 7. Canonical FlightLine Objects
 
 Phase 7 creates normalizers for:
 
@@ -104,7 +155,7 @@ Phase 7 creates normalizers for:
 
 The most important object for Flight Attendant is the normalized deal object.
 
-Example:
+Example normalized deal:
 
 ```json
 {
@@ -120,13 +171,14 @@ Example:
   "stage": "test_drive",
   "status": "active",
   "assignedTo": "Alex Demo",
+  "source": "Mock CRM",
   "ageInStageMinutes": 75
 }
 ```
 
 ---
 
-## 7. Why This Matters for Flight Attendant
+## 8. Why This Matters for Flight Attendant
 
 Flight Attendant should not need vendor-specific logic.
 
@@ -141,11 +193,17 @@ Who has no recent activity?
 
 This keeps Flight Attendant scoped, safer, and easier to maintain.
 
+The architecture now supports this future path:
+
+```text
+DMS / CRM / Inventory provider → Connector → Normalizer → FlightLine → Flight Attendant
+```
+
 ---
 
-## 8. Verification Commands
+## 9. Validation Commands Used
 
-After applying the patch:
+Syntax checks:
 
 ```bash
 cd /var/www/flightline/backend
@@ -159,7 +217,7 @@ node -c src/integrations/normalizers/flightlineNormalizer.js
 node -c src/server.js
 ```
 
-Restart backend after commit:
+Backend restart:
 
 ```bash
 pm2 restart flightline-backend
@@ -174,48 +232,79 @@ curl -s http://localhost:3001/api/integrations/mock/health | python3 -m json.too
 curl -s http://localhost:3001/api/integrations/mock/deals | python3 -m json.tool
 ```
 
-Expected status response:
+Final repository check:
 
-```json
-{
-  "success": true,
-  "status": "available",
-  "readOnly": true
-}
+```bash
+git status
+```
+
+Final result:
+
+```text
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
 ```
 
 ---
 
-## 9. Acceptance Criteria
+## 10. Acceptance Criteria
 
-Phase 7 foundation is accepted when:
+Phase 7 foundation acceptance criteria:
 
 - Backend syntax checks pass.
 - Server starts with integration route mounted.
 - `/api/integrations/status` returns success.
 - `/api/integrations/providers` lists registered providers.
+- `/api/integrations/mock/health` returns healthy.
 - `/api/integrations/mock/deals` returns normalized demo deals.
 - All responses indicate `readOnly: true`.
 - No write endpoints exist.
+- Git status is clean after commit and push.
+
+All acceptance criteria passed.
 
 ---
 
-## 10. Next Steps After Foundation
+## 11. Notes / Minor Cleanup Item
 
-Recommended Phase 7B:
+The mock data response currently shows `ageInStageMinutes` correctly, but `enteredStageAt` may default to the current timestamp when the mock record does not provide a stage-entered timestamp.
 
-1. Add integration event logging.
-2. Add provider credential schema design.
-3. Add encrypted credential storage plan.
-4. Add dealership-to-provider mapping.
-5. Add a generic API connector that can ingest a configured JSON endpoint.
-6. Connect Flight Attendant attention logic to normalized integration data, still read-only.
+This is not a blocker for Phase 7 because the provider is demo-only, but it should be cleaned up in the next phase so mock timestamps line up more naturally.
 
 ---
 
-## 11. Final Note
+## 12. Recommended Next Phase
 
-This is not a full enterprise integration platform yet. It is the foundation that prevents vendor-specific spaghetti.
+Recommended next phase:
+
+```text
+Phase 7A — Integration Data Quality + Attention Feed
+```
+
+Purpose:
+
+```text
+Make Flight Attendant read from the normalized integration layer instead of hardcoded demo deal logic.
+```
+
+Recommended Phase 7A scope:
+
+1. Clean mock timestamp handling.
+2. Add an attention-feed service on top of normalized deals.
+3. Define aging thresholds by stage.
+4. Add `/api/integrations/:provider/attention` or equivalent FlightLine internal endpoint.
+5. Connect Flight Attendant to the normalized integration feed.
+6. Keep all behavior read-only.
+
+---
+
+## 13. Final Status
+
+```text
+Phase 7 — Integration Layer Foundation: GREEN / ACCEPTED
+```
 
 The right architecture is now in place:
 
