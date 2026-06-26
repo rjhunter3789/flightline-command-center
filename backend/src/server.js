@@ -26,6 +26,7 @@ const incentiveRoutes = require('./routes/incentiveRoutes');
 const tradeInRoutes = require('./routes/tradeInRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const flightAttendantRoutes = require('./routes/flightAttendantRoutes');
+const integrationRoutes = require('./routes/integrationRoutes');
 
 // Import WebSocket handlers
 const socketHandler = require('./services/socketHandler');
@@ -66,6 +67,7 @@ app.use('/api/incentives', incentiveRoutes);
 app.use('/api/tradein', tradeInRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/flight-attendant', flightAttendantRoutes);
+app.use('/api/integrations', integrationRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
