@@ -457,3 +457,291 @@
   .flightline-mobile ::-webkit-scrollbar-thumb:hover {
     background: #64748b;
   }
+
+/* Phase 7B — Mobile Theme + Layout Cleanup */
+.flightline-mobile.theme-dark {
+  --fl-bg: #020617;
+  --fl-surface: #0f172a;
+  --fl-surface-soft: rgba(15, 23, 42, 0.78);
+  --fl-border: #1e293b;
+  --fl-border-strong: #334155;
+  --fl-text: #f8fafc;
+  --fl-muted: #94a3b8;
+  --fl-soft-text: #cbd5e1;
+  --fl-accent: #22d3ee;
+  --fl-accent-soft: rgba(34, 211, 238, 0.12);
+  --fl-card-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+.flightline-mobile.theme-light {
+  --fl-bg: #f8fafc;
+  --fl-surface: #ffffff;
+  --fl-surface-soft: rgba(255, 255, 255, 0.88);
+  --fl-border: #dbe4ef;
+  --fl-border-strong: #b8c7d9;
+  --fl-text: #0f172a;
+  --fl-muted: #64748b;
+  --fl-soft-text: #334155;
+  --fl-accent: #0ea5e9;
+  --fl-accent-soft: rgba(14, 165, 233, 0.12);
+  --fl-card-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.flightline-mobile {
+  background: var(--fl-bg);
+  color: var(--fl-text);
+  gap: 12px;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.mobile-header {
+  gap: 10px;
+}
+
+.mobile-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.dealer-badge {
+  background: var(--fl-surface);
+  color: var(--fl-soft-text);
+  border: 1px solid var(--fl-border);
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--fl-border);
+  border-radius: 999px;
+  background: var(--fl-surface-soft);
+}
+
+.theme-toggle-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fl-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.theme-toggle-button.active {
+  color: var(--fl-text);
+  background: var(--fl-accent-soft);
+}
+
+.mobile-title,
+.cta-label,
+.staff-name,
+.metric-value,
+.total-count,
+.deal-id {
+  color: var(--fl-text);
+}
+
+.mobile-subtitle,
+.section-title,
+.section-hint,
+.cta-description,
+.deal-stage,
+.deal-footer,
+.metric-label,
+.total-label,
+.staff-metrics,
+.deal-vehicle,
+.flight-attendant-voice-status {
+  color: var(--fl-muted);
+}
+
+.flight-attendant-section,
+.deals-section,
+.cta-section,
+.totals-section,
+.snapshot-section,
+.staff-section,
+.chat-section {
+  gap: 8px;
+}
+
+.flight-attendant-section.compact {
+  border: 1px solid var(--fl-border);
+  border-radius: 18px;
+  padding: 10px;
+  background: var(--fl-surface-soft);
+  box-shadow: var(--fl-card-shadow);
+}
+
+.flight-attendant-header {
+  gap: 8px;
+}
+
+.flight-attendant-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flight-attendant-card {
+  border-color: var(--fl-border);
+  background: var(--fl-surface);
+  padding: 10px;
+  box-shadow: none;
+}
+
+.flight-attendant-script {
+  color: var(--fl-soft-text);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.flight-attendant-expanded-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.flight-attendant-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.flight-attendant-actions {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.flight-attendant-button,
+.flight-attendant-speak,
+.flight-attendant-toggle,
+.flight-attendant-stop,
+.flight-attendant-expand,
+.cta-button,
+.stage-pill,
+.deal-card,
+.total-card,
+.metric-card,
+.staff-card {
+  border-color: var(--fl-border);
+  background: var(--fl-surface);
+  color: var(--fl-soft-text);
+  box-shadow: var(--fl-card-shadow);
+}
+
+.flight-attendant-speak.primary-talk {
+  background: var(--fl-accent-soft);
+  border-color: var(--fl-accent);
+  color: var(--fl-text);
+  min-width: 64px;
+}
+
+.flight-attendant-expand {
+  border-radius: 9999px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.flight-attendant-button.active,
+.flight-attendant-toggle.active,
+.cta-button.active,
+.stage-pill.active {
+  border-color: var(--fl-accent);
+  background: var(--fl-accent-soft);
+  color: var(--fl-text);
+}
+
+.flight-attendant-stop {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.cta-section {
+  margin-top: 0;
+}
+
+.cta-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cta-button {
+  min-width: 138px;
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+
+.cta-label {
+  font-size: 12px;
+}
+
+.cta-description {
+  display: none;
+}
+
+.stage-pills {
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.stage-pill {
+  padding: 6px 10px;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.deals-list {
+  max-height: none;
+  gap: 7px;
+}
+
+.deal-card {
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.deal-footer {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.no-deals {
+  color: var(--fl-muted);
+  border-color: var(--fl-border-strong);
+  background: var(--fl-surface-soft);
+}
+
+.flightline-mobile ::-webkit-scrollbar-track,
+.stage-pills::-webkit-scrollbar-track {
+  background: var(--fl-border);
+}
+
+.flightline-mobile ::-webkit-scrollbar-thumb,
+.stage-pills::-webkit-scrollbar-thumb {
+  background: var(--fl-border-strong);
+}
+
+@media (max-width: 375px) {
+  .theme-toggle-button {
+    padding: 4px 5px;
+    font-size: 9px;
+  }
+
+  .flight-attendant-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cta-button {
+    min-width: 126px;
+  }
+}
+

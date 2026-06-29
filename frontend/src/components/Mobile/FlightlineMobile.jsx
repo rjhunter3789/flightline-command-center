@@ -70,6 +70,19 @@
     name: "FlightLine Demo"
   };
 
+  const THEME_STORAGE_KEY = 'flightline.mobile.themePreference';
+
+  const getInitialThemePreference = () => {
+    if (typeof window === 'undefined') return 'system';
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return ['light', 'dark', 'system'].includes(savedTheme) ? savedTheme : 'system';
+  };
+
+  const getSystemTheme = () => {
+    if (typeof window === 'undefined' || !window.matchMedia) return 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
   const primaryCtas = [
     {
       id: "activeDeals",
@@ -105,6 +118,8 @@
     const [mobileFallbackDeals, setDeals] = useState(demoDeals);
     const deals = desktopDeals && desktopDeals.length ? desktopDeals : mobileFallbackDeals;
     const [dealership, setDealership] = useState(demoDealership);
+    const [themePreference, setThemePreference] = useState(getInitialThemePreference);
+    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
 
     const socket = null; // Mobile MVP demo mode: live WebSocket disabled until authenticated pilot flow is ready
 
@@ -113,6 +128,29 @@
       fetchDeals();
       fetchDealership();
     }, []);
+
+    useEffect(() => {
+      if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = (event) => {
+        setSystemTheme(event.matches ? 'dark' : 'light');
+      };
+
+      setSystemTheme(mediaQuery.matches ? 'dark' : 'light');
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      }
+
+      mediaQuery.addListener(handleSystemThemeChange);
+      return () => mediaQuery.removeListener(handleSystemThemeChange);
+    }, []);
+
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      window.localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+    }, [themePreference]);
 
     useEffect(() => {
       if (socket) {
@@ -188,18 +226,55 @@
       return acc;
     }, {});
 
+    const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference;
+
     return (
-      <div className="flightline-mobile">
+      <div className={`flightline-mobile theme-${resolvedTheme}`}>
         {/* Header */}
         <header className="mobile-header">
           <div className="header-content">
             <h1 className="mobile-title">FlightLine</h1>
             <p className="mobile-subtitle">Mobile command for deal flow</p>
           </div>
-          <span className="dealer-badge">
-            {dealership?.name || 'FlightLine Demo'}
-          </span>
+          <div className="mobile-header-actions">
+            <span className="dealer-badge">
+              {dealership?.name || 'FlightLine Demo'}
+            </span>
+            <div className="theme-toggle" role="group" aria-label="Theme mode">
+              <button
+                type="button"
+                className={`theme-toggle-button ${themePreference === 'light' ? 'active' : ''}`}
+                onClick={() => setThemePreference('light')}
+                aria-pressed={themePreference === 'light'}
+              >
+                Light
+              </button>
+              <button
+                type="button"
+                className={`theme-toggle-button ${themePreference === 'dark' ? 'active' : ''}`}
+                onClick={() => setThemePreference('dark')}
+                aria-pressed={themePreference === 'dark'}
+              >
+                Dark
+              </button>
+              <button
+                type="button"
+                className={`theme-toggle-button ${themePreference === 'system' ? 'active' : ''}`}
+                onClick={() => setThemePreference('system')}
+                aria-pressed={themePreference === 'system'}
+              >
+                Device
+              </button>
+            </div>
+          </div>
         </header>
+
+        <ActiveDealsSection
+          selectedStage={selectedStage}
+          onStageChange={setSelectedStage}
+          deals={getDealsForStage(selectedStage)}
+          countsByStage={countsByStage}
+        />
 
         <FlightAttendantSection
           deals={deals}
@@ -207,7 +282,7 @@
         />
 
         {/* Primary CTAs */}
-        <section className="cta-section">
+        <section className="cta-section compact-actions">
           <h2 className="section-title">Quick actions</h2>
           <div className="cta-grid">
             {primaryCtas.map((cta) => {
@@ -227,15 +302,6 @@
         </section>
 
         {/* Dynamic Content Based on Selected CTA */}
-        {selectedCta === "activeDeals" && (
-          <ActiveDealsSection
-            selectedStage={selectedStage}
-            onStageChange={setSelectedStage}
-            deals={getDealsForStage(selectedStage)}
-            countsByStage={countsByStage}
-          />
-        )}
-
         {selectedCta === "dealFlow" && (
           <DealFlowTotalsSection
             countsByStage={countsByStage}
@@ -490,6 +556,7 @@
     const [isGeneratingPremiumVoice, setIsGeneratingPremiumVoice] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [conversationActive, setConversationActive] = useState(false);
+    const [controlsExpanded, setControlsExpanded] = useState(false);
     const mediaStreamRef = useRef(null);
     const mediaRecorderRef = useRef(null);
     const recordingTimerRef = useRef(null);
@@ -891,26 +958,27 @@
     };
 
     return (
-      <section className="flight-attendant-section">
-        <div className="section-header">
+      <section className={`flight-attendant-section ${controlsExpanded ? 'expanded' : 'compact'}`}>
+        <div className="section-header flight-attendant-header">
           <div>
             <h2 className="section-title">Flight Attendant</h2>
-            <p className="section-hint">Scoped voice conversation for FlightLine deal activity</p>
+            <p className="section-hint">Deal-flow voice control</p>
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div className="flight-attendant-primary-actions">
             <button
-              className="flight-attendant-speak"
+              className="flight-attendant-speak primary-talk"
               onClick={conversationActive ? stopConversationSession : startConversationSession}
               disabled={isGeneratingPremiumVoice && !conversationActive}
             >
               {conversationActive ? (isListening ? 'Listening...' : 'End') : 'Talk'}
             </button>
             <button
-              className="flight-attendant-speak"
-              onClick={speakBriefing}
-              disabled={isGeneratingPremiumVoice || isListening}
+              type="button"
+              className="flight-attendant-expand"
+              onClick={() => setControlsExpanded((current) => !current)}
+              aria-expanded={controlsExpanded}
             >
-              {isGeneratingPremiumVoice ? 'Generating...' : 'Speak Briefing'}
+              {controlsExpanded ? 'Less' : 'More'}
             </button>
           </div>
         </div>
@@ -918,60 +986,73 @@
         <div className="flight-attendant-card">
           <p className="flight-attendant-script">{briefing}</p>
           <p className="flight-attendant-voice-status">{voiceInputStatus}</p>
-          {recognizedCommand && (
+          {recognizedCommand && controlsExpanded && (
             <p className="flight-attendant-voice-status">Heard: “{recognizedCommand}”</p>
           )}
-          <p className="flight-attendant-voice-status">{voiceStatus}</p>
+          {controlsExpanded && (
+            <p className="flight-attendant-voice-status">{voiceStatus}</p>
+          )}
         </div>
 
-        <div className="flight-attendant-controls">
-          <button
-            className={`flight-attendant-toggle ${briefingMode === 'short' ? 'active' : ''}`}
-            onClick={() => handleModeChange('short')}
-          >
-            Short
-          </button>
-          <button
-            className={`flight-attendant-toggle ${briefingMode === 'standard' ? 'active' : ''}`}
-            onClick={() => handleModeChange('standard')}
-          >
-            Standard
-          </button>
-          <button className="flight-attendant-stop" onClick={stopSpeaking}>
-            Stop Listening
-          </button>
-        </div>
+        {controlsExpanded && (
+          <div className="flight-attendant-expanded-controls">
+            <div className="flight-attendant-controls">
+              <button
+                className={`flight-attendant-toggle ${briefingMode === 'short' ? 'active' : ''}`}
+                onClick={() => handleModeChange('short')}
+              >
+                Short
+              </button>
+              <button
+                className={`flight-attendant-toggle ${briefingMode === 'standard' ? 'active' : ''}`}
+                onClick={() => handleModeChange('standard')}
+              >
+                Standard
+              </button>
+              <button
+                className="flight-attendant-speak secondary-speak"
+                onClick={speakBriefing}
+                disabled={isGeneratingPremiumVoice || isListening}
+              >
+                {isGeneratingPremiumVoice ? 'Generating...' : 'Speak Briefing'}
+              </button>
+              <button className="flight-attendant-stop" onClick={stopSpeaking}>
+                Stop
+              </button>
+            </div>
 
-        <p className="flight-attendant-voice-status">
-          Try: “Can you give me deal flow?”, “How are active deals looking?”, “What needs attention?”, “shorter version”, or “stop listening”.
-        </p>
+            <p className="flight-attendant-voice-status flight-attendant-example">
+              Try: “What needs attention?”, “active deals”, “deal flow”, “shorter version”, or “stop listening”.
+            </p>
 
-        <div className="flight-attendant-actions">
-          <button
-            className={`flight-attendant-button ${activeBriefing === 'activeDeals' ? 'active' : ''}`}
-            onClick={() => handleBriefing('activeDeals')}
-          >
-            Active Deal Summary
-          </button>
-          <button
-            className={`flight-attendant-button ${activeBriefing === 'dealFlow' ? 'active' : ''}`}
-            onClick={() => handleBriefing('dealFlow')}
-          >
-            Deal Flow Summary
-          </button>
-          <button
-            className={`flight-attendant-button ${activeBriefing === 'snapshot' ? 'active' : ''}`}
-            onClick={() => handleBriefing('snapshot')}
-          >
-            Today's Snapshot
-          </button>
-          <button
-            className={`flight-attendant-button ${activeBriefing === 'attention' ? 'active' : ''}`}
-            onClick={() => handleBriefing('attention')}
-          >
-            What Needs Attention?
-          </button>
-        </div>
+            <div className="flight-attendant-actions">
+              <button
+                className={`flight-attendant-button ${activeBriefing === 'activeDeals' ? 'active' : ''}`}
+                onClick={() => handleBriefing('activeDeals')}
+              >
+                Active Deals
+              </button>
+              <button
+                className={`flight-attendant-button ${activeBriefing === 'dealFlow' ? 'active' : ''}`}
+                onClick={() => handleBriefing('dealFlow')}
+              >
+                Deal Flow
+              </button>
+              <button
+                className={`flight-attendant-button ${activeBriefing === 'snapshot' ? 'active' : ''}`}
+                onClick={() => handleBriefing('snapshot')}
+              >
+                Snapshot
+              </button>
+              <button
+                className={`flight-attendant-button ${activeBriefing === 'attention' ? 'active' : ''}`}
+                onClick={() => handleBriefing('attention')}
+              >
+                Attention
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     );
   };
