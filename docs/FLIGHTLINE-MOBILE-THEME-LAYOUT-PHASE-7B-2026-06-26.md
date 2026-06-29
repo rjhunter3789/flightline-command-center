@@ -95,3 +95,12 @@ Recommended mobile QA:
 ## 6. Final Note
 
 This phase should make the mobile PWA feel calmer and more operational without removing any functionality.
+
+
+## PWA Icon Update
+
+- PWA home-screen icon wired for iPhone.
+- Added apple-touch-icon.png.
+- Added icon-192.png and icon-512.png from the same FL mark.
+- Added manifest.json.
+- Updated index.html with Apple mobile web app metadata.
