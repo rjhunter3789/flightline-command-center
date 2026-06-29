@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+from pathlib import Path
+
+root = Path.cwd()
+jsx_path = root / 'frontend/src/components/Mobile/FlightlineMobile.jsx'
+css_path = root / 'frontend/src/components/Mobile/FlightlineMobile.css'
+logo_path = root / 'frontend/public/flightline-logo.svg'
+doc_path = root / 'docs/FLIGHTLINE-MOBILE-THEME-LAYOUT-PHASE-7B-2026-06-26.md'
+
+if not jsx_path.exists():
+    raise SystemExit('Missing frontend/src/components/Mobile/FlightlineMobile.jsx')
+if not css_path.exists():
+    raise SystemExit('Missing frontend/src/components/Mobile/FlightlineMobile.css')
+
+logo_path.parent.mkdir(parents=True, exist_ok=True)
+logo_path.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="FlightLine logo">\n  <image href="data:image/jpeg;base64,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" width="256" height="256" preserveAspectRatio="xMidYMid meet"/>\n</svg>\n')
+
+jsx = jsx_path.read_text()
+css = css_path.read_text()
+
+old_header = '''          <div className="header-content">
+            <h1 className="mobile-title">FlightLine</h1>
+            <p className="mobile-subtitle">Mobile command for deal flow</p>
+          </div>'''
+new_header = '''          <div className="header-content header-brand">
+            <img className="mobile-logo" src="/flightline-logo.svg" alt="FlightLine logo" />
+            <div className="mobile-title-group">
+              <h1 className="mobile-title">FlightLine</h1>
+              <p className="mobile-subtitle">Mobile command for deal flow</p>
+            </div>
+          </div>'''
+
+if old_header in jsx:
+    jsx = jsx.replace(old_header, new_header, 1)
+elif 'mobile-logo' not in jsx:
+    raise SystemExit('Could not find mobile header content block to add logo')
+
+css_add = r'''
+
+/* Phase 7B logo refinement */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.mobile-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: var(--fl-card-shadow, 0 6px 18px rgba(15, 23, 42, 0.14));
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #ffffff;
+}
+
+.mobile-title-group {
+  min-width: 0;
+}
+
+.theme-light .mobile-logo {
+  border-color: rgba(15, 23, 42, 0.10);
+}
+
+.theme-dark .mobile-logo {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 375px) {
+  .mobile-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .header-brand {
+    gap: 7px;
+  }
+}
+'''
+
+if 'Phase 7B logo refinement' not in css:
+    css = css.rstrip() + css_add + '\n'
+
+if doc_path.exists():
+    doc = doc_path.read_text()
+    if 'frontend/public/flightline-logo.svg' not in doc:
+        doc = doc.replace(
+            'frontend/src/components/Mobile/FlightlineMobile.css\n```',
+            'frontend/src/components/Mobile/FlightlineMobile.css\nfrontend/public/flightline-logo.svg\n```'
+        )
+    if 'FL logo added to the mobile header.' not in doc:
+        doc = doc.replace(
+            '- More flexible stage pills and deal cards.',
+            '- More flexible stage pills and deal cards.\n- FL logo added to the mobile header.'
+        )
+    doc_path.write_text(doc)
+
+jsx_path.write_text(jsx)
+css_path.write_text(css)
+
+print('Applied FlightLine mobile logo patch.')
+print('Wrote frontend/public/flightline-logo.svg')
+print('Updated frontend/src/components/Mobile/FlightlineMobile.jsx')
+print('Updated frontend/src/components/Mobile/FlightlineMobile.css')
+print('Updated Phase 7B documentation if present')
