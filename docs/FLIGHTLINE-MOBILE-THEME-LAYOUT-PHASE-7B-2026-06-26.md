@@ -34,6 +34,7 @@ Phase 7B adds:
 - Quick Actions converted to a more compact horizontal row.
 - Reduced card padding and vertical crowding.
 - More flexible stage pills and deal cards.
+- FL logo added to the mobile header.
 
 ---
 
@@ -42,6 +43,7 @@ Phase 7B adds:
 ```text
 frontend/src/components/Mobile/FlightlineMobile.jsx
 frontend/src/components/Mobile/FlightlineMobile.css
+frontend/public/flightline-logo.svg
 ```
 
 ---

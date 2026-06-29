@@ -232,9 +232,12 @@
       <div className={`flightline-mobile theme-${resolvedTheme}`}>
         {/* Header */}
         <header className="mobile-header">
-          <div className="header-content">
-            <h1 className="mobile-title">FlightLine</h1>
-            <p className="mobile-subtitle">Mobile command for deal flow</p>
+          <div className="header-content header-brand">
+            <img className="mobile-logo" src="/flightline-logo.svg" alt="FlightLine logo" />
+            <div className="mobile-title-group">
+              <h1 className="mobile-title">FlightLine</h1>
+              <p className="mobile-subtitle">Mobile command for deal flow</p>
+            </div>
           </div>
           <div className="mobile-header-actions">
             <span className="dealer-badge">
