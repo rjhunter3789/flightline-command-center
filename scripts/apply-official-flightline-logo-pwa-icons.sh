@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if ! command -v convert >/dev/null 2>&1; then
+  echo "Missing convert. Install it with: apt-get install -y imagemagick-6.q16"
+  exit 1
+fi
+
+cat > frontend/public/flightline-logo-source.jpg.b64 <<'EOF'
+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
+Rt/wAHGUecHEc+XSVurtd4RjbYqsmrt/E9njZtMug5M4trncyf4v+SjI8DS6odK2z/Jx0xftHDWe
+UMsDFcJrVFb/MXtj7lZP6XbWvYelTw4xMOb97j6cq6xlYbXv8Aku7a/Fk8aWlK8PfM3KfPSzvKje
+8zl1Kfc8ruLRri51fZI9+pYuwb5eX/bH4YzZKHq5GRz+qisbo2nJNP4XI2azE34ol6Mq3ROr6r79
+T7rmn0s9p9flfbw3x/wBmnWH/AKNPd/FdFTc6/I9sqt4yxbq3+64m25n2gtGeW8WVoxd1qvdve2u
+rvDPNM/yhNFyM/qLDH8kJyzGV/qdKnnVrJ8X97v+RbzZW6jj8c/LNVpKKeT7pnj2WuenDYnJ1fJ+
+L/rYPDN7bkm/RwaLN/Zx9Vv5X2VsM4z+bPsfD2+ZVFN6b4Y/MZpqefm/kfYwPnffXw/IAAAAAAAA
+Ko6aqKqc5xk+yS2eZ48zZBrFOW9jNGPtdl5XVu4uDXLGbbqnk8T6lCFXKT9zGWX+56mM3NqcVJo3
+PSfc8cdHz5cHMfZpTirb2+2l71rzRl2m7w1YZkf0XidPXpl9tZtSb2d1vddN1SjrZvcY9PV/VcPE
+7GVXjGlapc0n2lp/bGXnLnuj9XezjmIfppl1Tz7mWeukN6+cK7KjHl+LtNdR8OdLvxs67NmrVof5
+WrLfPiK6P2Lt06uU239fweDb8/yyp1uE1Yxc36vzk9eOuZdG1V3pX7FnvQ5pLCX19ysbpuVTsfLc
+ex/TPZDmk/oOWzfN+8Z6+fjSTXYf5c8uyhVaeTUIzR0l6XnNsTj6aRp/R8MXG7/r/vsXXinB5v7v
+7n+8Z7NuzWV5tddv3bgsXu5yy/V70pR01Gec/Z6dZ4Q4yMpty8+TLTycznJc2y8Z3GqURTbcP/wC
+Sr9jD0cTccfDUY/8APW96v4qp1nK5P9Z49iR+trzwmK4/Bo5WMvVVYji4uLYUbeprzI3w00Y/wBq
+k3/J0XDaAAAAAAAAqL/bq+2pbR8yzFzi+0KkusPI8WTuPGDxka2YRbq6R03KScWtG/Y3KHZE48oOd
+8M4twbTE7r1KpP3/1zzceJLU3su3s/L3yX8jYfVf1d63Uq9mdG5Uu7+G38NKfcZdFXlGe2VjdZsT
+WV7x3OF7zJSpwWi49zl63Ldx7byRkk+Ku0+eNtJl7f25cJ0o/nvV9adZyfy7qUo3RdGWvZPpV+Yu
+pSqcZKc4vuMcnc+eX14xGMYW4qi43tLYT/ADP/AD06Xeip3r9d+vxNG7eWvwe8v1f0+3vBzx2jpr
+hJJ+XI7YVJ/gYYnQ56ayjGUmoPMedYPu/R7Pkkm0X4WMfH3nHjfKC5l9RiOPz4Ji87jtVGTb+W98
+9MNwRrm3vAOPVMOquq9Ure7GThct6sfL8jufBz7Es6PVDOrLiqMpn2IpJc/L71ycczMjJcfT4MTF
+lao6m+cn7Gy1fS4dRjM+EX5pyXGWFsrKeHfMeq5hAAAAAAAAAKOL9T+4clTOvRXzHzntp6r61cm8
+2z1eGqvBeZ7n8YPMNern4mq1ynNR4OT5+yb+FHT6L6dKcunUlw3N/lf0WjepfziV2rqyqxorn1cZ
+Rx7hb4iJ8WZcPIqtPw1rXV6m5mmvy4uEKSq5rMmrzZv8AjydNy2tXT+yx2/kvzXMOp9Va0ZqfW0Z
+69v9+52eEeMZ+dT2cyrlaSbkY+dtb5jdyVFp15J5U+R81v3Lcc3Ao1zzKs4ufXzXU4ZSo6pNfZD5
+PDrLDhvslm7z7mZTxN7l7Xl0yXarQe0jZ5rexbFL7j0b/Ubdc6Lj11Zwfcy/PQm+I1X29HKf+eW9
+zoaZr1aLqzf7/xwe0c3LydO7dX34sq8+X5aZk3iXLs4vJtn5Pc7NOnT17lT12v4mdzG3a9J4jP1
+tjvOapU+OzErttjsb7kxRa0lPZfD5/2lwh4OFnd/6Nd+z5bfbr+aL6SxWihP4W9m42Xe/uXltcdv
+ypdwcr2eRsSfm9kJ++ZzWWl0y+Wr2/8ALfCTp0LAAAAAAAAAADTqclGN4qk5W4juv7P18P0dnK5U
+apbSUn3P+w2L1/DNre8R/b7MwX0cvQlX4qnLy8fsLt+JrfN6NV/0x6VzDj3K90zzrhZpwlbTwt11
+OFwy9OC5n0y5HU4fJzXFd3Vt/I8sEr8DHZg+LcMd3oAAAAAAAAAB//9k=
+EOF
+
+base64 -d frontend/public/flightline-logo-source.jpg.b64 > frontend/public/flightline-logo-source.jpg
+rm -f frontend/public/flightline-logo-source.jpg.b64
+
+convert frontend/public/flightline-logo-source.jpg -resize 180x180! frontend/public/apple-touch-icon.png
+convert frontend/public/flightline-logo-source.jpg -resize 192x192! frontend/public/icon-192.png
+convert frontend/public/flightline-logo-source.jpg -resize 512x512! frontend/public/icon-512.png
+
+perl -pi -e 's/apple-touch-icon\.png\?v=\d+/apple-touch-icon.png?v=7/g; s/manifest\.json\?v=\d+/manifest.json?v=7/g; s/icon-192\.png\?v=\d+/icon-192.png?v=7/g; s/icon-512\.png\?v=\d+/icon-512.png?v=7/g' frontend/public/index.html frontend/public/manifest.json
+
+file frontend/public/flightline-logo-source.jpg
+file frontend/public/apple-touch-icon.png
+file frontend/public/icon-192.png
+file frontend/public/icon-512.png
+ls -lh frontend/public/flightline-logo-source.jpg frontend/public/apple-touch-icon.png frontend/public/icon-192.png frontend/public/icon-512.png
+
+echo "Official FlightLine logo PWA icons applied."
